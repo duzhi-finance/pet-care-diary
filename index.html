@@ -959,6 +959,7 @@ function renderCalendar(){
       <p style="margin:0 0 12px" class="small">將所有「下次預估日期」與消耗品補貨提醒匯出成 .ics 檔，用手機行事曆 App 開啟匯入，由手機負責推播通知。每個事件會在<b>前一天 09:00</b>與<b>當天 09:00</b>各提醒一次。</p>
       <p class="small muted" style="margin:0 0 16px">目前共有 ${upcoming.length} 筆提醒（已逾期的項目會排在今天；補貨提醒排在用完前 7 天）。新增紀錄後，記得再匯出一次。</p>
       <button class="btn dark block" data-act="ics-all" ${upcoming.length?'':'disabled'}>匯出至手機行事曆 (.ics)</button>
+      <div class="hint" style="margin-top:10px">iPhone：開啟檔案後按「<b>加入全部</b>」（單筆則按右上角 ✓），才會真正存進行事曆。Android：用 Google 日曆或三星日曆開啟即可匯入。</div>
     </div>
   </section>`;
 }
@@ -1005,7 +1006,10 @@ function buildICS(events){
 }
 function exportICS(events, name){
   if(!events.length){ toast('沒有可匯出的提醒'); return; }
-  download(name, buildICS(events), 'text/calendar;charset=utf-8').then(ok => ok && toast(`已匯出 ${events.length} 筆提醒`));
+  download(name, buildICS(events), 'text/calendar;charset=utf-8').then(ok => {
+    if(!ok) return;
+    notice(`已匯出 ${events.length} 筆提醒 📅\n\n接下來請在跳出的行事曆畫面：\n・iPhone 單筆：按右上角 ✓\n・iPhone 多筆：按「加入全部」\n\n按下後才會真正存進行事曆；日期是預估執行日，要翻到那天才看得到。`);
+  });
 }
 
 /* ============================================================
@@ -1540,8 +1544,8 @@ function bookingSheet(petId, cat){
   const ev = it && it.due ? careEvent(it) : null;
   const ics = ev ? `<div class="bk-shop"><div class="bk-btns" style="margin:0">
       <button class="bk-btn full dark" data-act="ics-one" data-pet="${pet.id}" data-cat="${it.cat}">一鍵匯出手機行事曆 (.ics)</button>
-      <a class="bk-btn full" href="${esc(gcalURL(ev))}" target="_blank" rel="noopener">加入 Google 日曆</a>
-    </div></div>` : '';
+    </div>
+    <div class="hint" style="margin-top:8px">iPhone：開啟後按右上角 <b>✓</b> 才會存進行事曆。<a class="linkbtn" href="${esc(gcalURL(ev))}" target="_blank" rel="noopener" style="margin-left:4px">或改用 Google 日曆</a></div></div>` : '';
   openSheet('快速預約', ctx + (main
     ? shopBlock(main, def && main.id===def.id) + others.map(s=>shopBlock(s, def && s.id===def.id)).join('') + ics + `<button class="linkbtn" data-act="goto-shops">管理常用店家</button>`
     : `<div class="empty"><span class="serif">尚未設定常用店家</span>新增店家的電話或 LINE／預約網址，之後按「快速預約」就能直接聯絡。</div>
