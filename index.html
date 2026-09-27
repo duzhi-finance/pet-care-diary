@@ -112,6 +112,9 @@ h1,h2,h3,.serif{font-family:var(--serif);font-weight:500;letter-spacing:.04em}
 .idc{padding:0;overflow:hidden}
 .idc-band{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid var(--line)}
 .idc-band .k{font-size:10.5px;letter-spacing:.32em;color:var(--muted-2)}
+.chip-no{display:inline-flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;letter-spacing:.06em;text-align:left}
+.copy-ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);color:var(--muted);background:#fff;flex:none}
+.chip-no:active .copy-ic{background:var(--rose-bg);color:var(--rose-ink);border-color:var(--rose-bg)}
 .pass-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 12px;border-radius:99px;border:1px solid var(--gold);color:var(--gold-ink);background:#fff;letter-spacing:.06em}
 .idc-top{display:flex;gap:20px;align-items:center;padding:22px 22px 6px}
 .idc-name{font-family:var(--serif);font-size:28px;font-weight:500;letter-spacing:.16em;line-height:1.2;text-transform:uppercase}
@@ -295,6 +298,8 @@ select.inp{background:#FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .btn-text.warn{color:var(--warn-ink);margin-right:auto;padding-left:0}
 .btn-save{flex:1;height:50px;border-radius:12px;background:var(--ink);color:#FFFFFF;font-size:14.5px;letter-spacing:.1em;font-weight:400;transition:background .2s}
 .btn-save:active{background:#000}
+.sheet.full{max-height:100vh;max-height:100dvh;height:100dvh;border-radius:0;border:0;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+@media (min-width:700px){.sheet.full{height:auto;max-height:92vh;border-radius:16px;border:1px solid var(--line)}}
 @media (min-width:700px){.modal{align-items:center}.sheet{border-radius:16px;border-bottom:1px solid var(--line);max-height:86vh}}
 
 /* booking */
@@ -672,7 +677,7 @@ function identityCard(p){
   const v = vaccines(p), bd = nextBirthday(p.birthday), sx = sexIcon(p.gender);
   return `<section class="card idc">
     <div class="idc-band"><span class="k">PET IDENTITY CARD</span>
-      <button class="pass-btn" data-act="passport" data-id="${p.id}">🪪 寵物電子護照</button></div>
+      <button class="pass-btn" data-act="passport" data-id="${p.id}">🪪 出示電子護照</button></div>
     <div class="idc-top">
       <button class="av-ring" data-act="pet-photo" data-id="${p.id}" aria-label="更換大頭貼">
         ${avatarHTML(p)}${sx?`<span class="sex" title="${esc(p.gender)}">${sx}</span>`:''}<span class="cam">✎</span>
@@ -685,8 +690,8 @@ function identityCard(p){
       </div>
     </div>
     <div class="idc-rows">
-      <div class="idc-row"><span class="l">晶片號碼</span><span class="v">${esc(p.chip||'未填寫')}</span>
-        ${p.chip?`<button class="btn sm" data-act="copy-chip" data-id="${p.id}">一鍵複製</button>`:`<button class="linkbtn" data-act="edit-pet" data-id="${p.id}">填寫</button>`}</div>
+      <div class="idc-row"><span class="l">晶片號碼</span><span class="v">${p.chip?`<button class="chip-no" data-act="copy-chip" data-id="${p.id}">${esc(p.chip)}<span class="copy-ic" aria-label="複製晶片號碼"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></svg></span></button>`:'<span class="muted">未填寫</span>'}</span>
+        ${p.chip?'':`<button class="linkbtn" data-act="edit-pet" data-id="${p.id}">填寫</button>`}</div>
       <div class="idc-row"><span class="l">狂犬病疫苗</span><span class="v"><span class="badge ${v.rabiesS.cls}">${v.rabiesS.txt}</span></span></div>
       ${bd ? `<div class="idc-row"><span class="l">生日倒數</span><span class="v">${bd.days===0?`🎂 今天 ${bd.age} 歲生日！`:`${md(bd.date)} · 還有 ${bd.days} 天滿 ${bd.age} 歲`}</span></div>` : ''}
     </div>
@@ -1027,8 +1032,8 @@ function weightChart(pts, target){
   const area = line + `L${X(pts[pts.length-1].x).toFixed(1)},${H-B}L${X(pts[0].x).toFixed(1)},${H-B}Z`;
   const last = pts[pts.length-1];
   const xl = [pts[0], pts.length>1 ? last : null].filter(Boolean).map((p,i)=>`<text x="${X(p.x)}" y="${H-8}" text-anchor="${pts.length===1?'middle':i?'end':'start'}" font-size="10" fill="#8E8E93">${dotDate(p.x)}</text>`).join('');
-  const tgt = target != null ? `<line x1="${L}" x2="${W-R}" y1="${Y(target)}" y2="${Y(target)}" stroke="#D4AF37" stroke-width="1.2" stroke-dasharray="4 4"/>
-    <text x="${L+4}" y="${Y(target)-5}" font-size="10" fill="#8F7220">目標 ${target} kg</text>` : '';
+  const tgt = target != null ? `<line x1="${L}" x2="${W-R}" y1="${Y(target)}" y2="${Y(target)}" stroke="#B5B5B5" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <text x="${L+4}" y="${Y(target)-5}" font-size="10" fill="#8E8E93">理想 ${target} kg</text>` : '';
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="體重趨勢圖">
     <defs><linearGradient id="wg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2B2B2B" stop-opacity=".06"/><stop offset="1" stop-color="#2B2B2B" stop-opacity="0"/></linearGradient></defs>
     ${grid}${tgt}
@@ -1096,19 +1101,19 @@ function renderStats(){
         <div class="kpi"><div class="v">${pr.length}</div><div class="l">照護紀錄</div></div>
         <div class="kpi"><div class="v">${spent>=10000?(spent/1000).toFixed(1)+'<small>k</small>':Math.round(spent).toLocaleString()}</div><div class="l">累計花費</div></div>
         <div class="kpi"><div class="v">${w!=null?w:'—'}<small>kg</small></div><div class="l">目前體重</div></div>
-        <div class="kpi"><div class="v">${num(p.targetWeight)!=null?p.targetWeight:'—'}<small>kg</small></div><div class="l">目標體重</div></div>
+        <div class="kpi"><div class="v">${num(p.targetWeight)!=null?p.targetWeight:'—'}<small>kg</small></div><div class="l">理想體重</div></div>
       </div>
     </section>`;
     const pts = pr.filter(r=>num(r.weight)!=null).reverse().map(r=>({x:r.date, y:Number(r.weight), c:r.category}));
     const tg = num(p.targetWeight);
     wHTML = `<section class="sec">
-      <div class="sec-h"><h2>體重趨勢<span class="en">Weight</span></h2><span class="aside">${tg!=null?`<span class="badge gold">- - 目標 ${tg} kg</span>`:`<button class="linkbtn" data-act="edit-pet" data-id="${p.id}">設定目標體重</button>`}</span></div>
+      <div class="sec-h"><h2>體重趨勢<span class="en">Weight</span></h2><span class="aside">${tg!=null?`<span class="badge">┄ 理想體重 ${tg} kg</span>`:`<button class="linkbtn" data-act="edit-pet" data-id="${p.id}">設定理想體重</button>`}</span></div>
       <div class="card pad">${pts.length ? `
         <div class="row between" style="margin-bottom:10px">
           <div><div class="big">${pts[pts.length-1].y}<small class="small muted"> kg</small></div><div class="small muted">最近一次 · ${dotDate(pts[pts.length-1].x)}</div></div>
           ${(()=>{ const out = [];
             if(pts.length>1){ const d = +(pts[pts.length-1].y - pts[0].y).toFixed(2); out.push(`<span class="muted">相較 ${dotDate(pts[0].x)}</span> <span class="serif">${d>0?'+':''}${d} kg</span>`); }
-            if(tg!=null){ const g = +(pts[pts.length-1].y - tg).toFixed(2); out.push(`<span class="muted">距離目標</span> <span class="serif">${g>0?'+':''}${g} kg</span>`); }
+            if(tg!=null){ const g = +(pts[pts.length-1].y - tg).toFixed(2); out.push(`<span class="muted">距離理想</span> <span class="serif">${g>0?'+':''}${g} kg</span>`); }
             return `<div class="small" style="text-align:right">${out.join('<br>')}</div>`; })()}
         </div>${weightChart(pts, tg)}` : `<div class="empty">還沒有體重紀錄，新增照護紀錄時填入「當次體重」即可自動生成趨勢圖。</div>`}
       </div></section>`;
@@ -1161,6 +1166,15 @@ function renderSettings(){
         <div class="field"><label for="o-phone">飼主電話</label><input class="inp" id="o-phone" type="tel" value="${esc(o.phone)}" data-change="owner" data-k="phone" placeholder="0912-345-678"></div>
       </div>
     </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h2>飼料與消耗品<span class="en">Supplies</span></h2><button class="linkbtn" data-act="add-supply">＋ 新增</button></div>
+    <div class="card">${state.supplies.length ? suppliesOf().map(x=>`
+      <div class="list-item">
+        <div class="grow"><div class="serif">${esc(x.s.name)}</div><div class="small ${x.low?'':'muted'}" style="${x.low?'color:var(--warn-ink)':''}">${esc(petById(x.s.petId)?.name||'共用')} · 預計 ${dotDate(x.end)} 用完（${x.left<0?`已超過 ${-x.left} 天`:`剩 ${x.left} 天`}）</div></div>
+        <button class="linkbtn" data-act="edit-supply" data-id="${x.s.id}">編輯</button>
+      </div>`).join('') : `<div class="empty">記錄飼料、貓砂或藥品的開袋日期與可用天數，剩 7 天時提醒補貨。</div>`}</div>
   </section>
 
   <section class="sec">
@@ -1217,6 +1231,7 @@ function go(v){ ui.view = v; render(); window.scrollTo({top:0}); }
    ============================================================ */
 function openSheet(title, body, actions, en=''){
   $('#sheet').innerHTML = `<div class="grab"></div><div class="sheet-h"><div>${en?`<span class="en">${en}</span>`:''}<h3>${title}</h3></div><button class="close" data-act="close" aria-label="關閉">×</button></div>${body}${actions?`<div class="sheet-actions">${actions}</div>`:''}`;
+  $('#sheet').className = 'sheet';
   $('#sheet').scrollTop = 0;
   $('#modal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1379,7 +1394,7 @@ function petForm(pet){
       <div class="field"><label for="p-bd">生日</label><input class="inp" type="date" id="p-bd" name="birthday" value="${p.birthday}"></div>
       <div class="field"><label for="p-coat">毛質</label><input class="inp" id="p-coat" name="coat" list="coatList" value="${esc(p.coat)}" placeholder="捲毛"><datalist id="coatList">${COATS.map(c=>`<option value="${c}">`).join('')}</datalist></div>
       <div class="field"><label for="p-w">體重 (kg)</label><input class="inp" type="number" step="0.01" min="0" inputmode="decimal" id="p-w" name="weight" value="${p.weight??''}"></div>
-      <div class="field"><label for="p-tw">目標體重 (kg)</label><input class="inp" type="number" step="0.01" min="0" inputmode="decimal" id="p-tw" name="targetWeight" value="${p.targetWeight??''}" placeholder="選填"></div>
+      <div class="field"><label for="p-tw">理想目標體重 (kg)</label><input class="inp" type="number" step="0.01" min="0" inputmode="decimal" id="p-tw" name="targetWeight" value="${p.targetWeight??''}" placeholder="選填"></div>
     </div>
     <div class="field"><label for="p-nick">個性簽名 / 小名</label><input class="inp" id="p-nick" name="nickname" value="${esc(p.nickname||'')}" placeholder="家裡的罐頭監工大師 👑"></div>
     <div class="field"><label for="p-tags">個性標籤</label><input class="inp" id="p-tags" name="tags" value="${esc((p.tags||[]).join('、'))}" placeholder="極度怕響雷、過敏體質（用頓號或逗號分隔）"></div>
@@ -1562,10 +1577,14 @@ function passportSheet(p){
         ${p.nickname?`<div class="idc-quote">「${esc(p.nickname)}」</div>`:''}
         ${p.tags && p.tags.length?`<div class="tags" style="justify-content:center">${tagBadges(p)}</div>`:''}
         <dl class="pp-dl">
-          ${row('晶片號碼', `${esc(p.chip||'—')} ${p.chip?`<button class="linkbtn" data-act="copy-chip" data-id="${p.id}" style="margin-left:6px">複製</button>`:''}`)}
+          ${row('晶片號碼', p.chip?`<button class="chip-no" data-act="copy-chip" data-id="${p.id}">${esc(p.chip)}<span class="copy-ic" aria-label="複製晶片號碼"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></svg></span></button>`:'—')}
           ${row('生日', p.birthday ? `${dotDate(p.birthday)}${bd?`<span class="muted small">　${bd.days===0?'今天生日 🎂':`還有 ${bd.days} 天`}</span>`:''}` : '—')}
           ${row('體重', w!=null?`${w} kg`:'—')}
+          ${row('過敏史', p.allergies?`<span class="badge warn">${esc(p.allergies)}</span>`:'無')}
+          ${row('狂犬病疫苗', `<span class="badge ${v.rabiesS.cls}">${v.rabiesS.txt}</span>`)}
+          ${row('急診獸醫', vet ? `${esc(vet.name)}${vet.phone?`<br><a class="linkbtn" style="color:var(--ink)" href="${esc(telURL(vet.phone))}">☎ ${esc(vet.phone)}</a>`:''}` : (p.erPhone?`<a class="linkbtn" style="color:var(--ink)" href="${esc(telURL(p.erPhone))}">☎ ${esc(p.erPhone)}</a>`:'—'))}
         </dl>
+        <div class="small muted" style="margin-top:14px">翻面查看 QR Code 與完整醫療資料</div>
       </div>
       <div class="face back">
         <div class="pp-k"><span>MEDICAL & EMERGENCY</span><span>背面</span></div>
@@ -1590,6 +1609,7 @@ function passportSheet(p){
   </div>
   <div style="text-align:center;margin-top:14px"><button class="linkbtn" data-act="edit-pet" data-id="${p.id}">編輯護照資料</button></div>
   `, '', 'Pet Emergency Passport');
+  $('#sheet').classList.add('full');
 }
 function loadImg(src){ return new Promise(res => { if(!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }); }
 async function passportPNG(p){
