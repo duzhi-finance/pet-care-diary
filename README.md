@@ -1,6 +1,6 @@
 # 毛孩日誌 Pet Care Diary
 
-給忙碌毛孩家長的寵物照護紀錄工具。單一 HTML 檔，不需後端、不需登入，資料存在瀏覽器 IndexedDB。
+給忙碌毛孩家長的寵物照護紀錄工具。單一 HTML 檔，不需後端、不需登入，資料存在瀏覽器 localStorage（約 5MB，照片會壓縮）。
 
 ## 使用
 直接用瀏覽器開啟 `index.html`（或部署到 GitHub Pages 後用手機開啟，可「加入主畫面」）。

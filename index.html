@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F8F5EF">
+<meta name="theme-color" content="#FAF9F6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="毛孩日誌">
@@ -14,14 +14,15 @@
 <style>
 :root{
   color-scheme: light;
-  --bg:#F8F5EF;
+  --bg:#FAF9F6;
   --paper:#FFFFFF;
-  --paper-2:#FCFAF6;
-  --ink:#2B2926;
-  --ink-2:#55514B;
-  --muted:#9B958C;
-  --line:#ECE6DC;
-  --line-2:#E0D8CB;
+  --paper-2:#FAFAFA;
+  --ink:#2B2B2B;
+  --ink-2:#4A4A4A;
+  --muted:#8C8C8C;
+  --line:#E5E5E5;
+  --line-2:#DCDCDC;
+  --gold:#D4AF37;
   --warn:#B4452F;
   --warn-bg:#FBF1EC;
   --radius:14px;
@@ -97,7 +98,7 @@ h1,h2,h3,.serif{font-family:var(--serif);font-weight:600;letter-spacing:.04em}
 
 /* neon rings */
 .rings{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px 4px;padding:18px 10px 10px}
-.ring{display:flex;flex-direction:column;align-items:center;text-align:center;padding:4px 0 8px}
+.ring{width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding:4px 0 8px}
 .ring svg{width:84px;height:84px;overflow:visible}
 .ring .trk{fill:none;stroke:#F1ECE4;stroke-width:5}
 .ring .prog{fill:none;stroke-width:5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .8s ease}
@@ -199,45 +200,66 @@ select.inline{border:1px solid var(--line-2);border-radius:999px;padding:4px 28p
 .cyc+.cyc{border-top:1px solid var(--line)}
 .cyc input{width:84px;text-align:right}
 
-/* forms */
-.field{margin-bottom:14px}
-.field>label,.flabel{display:block;font-size:12px;color:var(--muted);letter-spacing:.1em;margin-bottom:5px}
-.inp{width:100%;border:1px solid var(--line-2);background:var(--paper);border-radius:10px;padding:10px 12px;font-size:16px;outline:none;appearance:none;-webkit-appearance:none}
-.inp:focus{border-color:var(--ink-2)}
-textarea.inp{min-height:70px;resize:vertical}
-select.inp{background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239B958C' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:32px}
-.opt{position:relative}
+/* forms — EYELASH：純白、細線、無彩色 */
+.field{margin-bottom:22px}
+.field>label,.flabel{display:block;font-size:12px;font-weight:400;color:#8C8C8C;letter-spacing:.12em;margin-bottom:6px}
+.inp{width:100%;border:1px solid #EAEAEA;background:#FFFFFF;border-radius:8px;padding:11px 14px;font-size:16px;font-weight:300;color:var(--ink);outline:none;appearance:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s;min-height:46px}
+.inp::placeholder{color:#BDBDBD}
+.inp:focus{border-color:rgba(212,175,55,.55);box-shadow:0 2px 8px rgba(0,0,0,.03)}
+textarea.inp{min-height:84px;resize:vertical;line-height:1.7}
+select.inp{background:#FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238C8C8C' stroke-width='1.2'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:34px}
+input[type=date].inp{text-align:left}
+.opts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.opts.skin{grid-template-columns:repeat(3,1fr)}
+.opt{position:relative;display:block}
 .opt input{position:absolute;opacity:0;pointer-events:none}
-.opt span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;font-size:13.5px;background:var(--paper);color:var(--ink-2)}
-.opt input:checked+span{background:var(--ink);color:#fff;border-color:var(--ink)}
-.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt span{display:flex;align-items:center;justify-content:center;height:38px;border:1px solid #E5E5E5;border-radius:8px;padding:0 6px;font-size:13px;font-weight:400;letter-spacing:.06em;background:#FFFFFF;color:#4A4A4A;transition:all .18s;white-space:nowrap;cursor:pointer}
+.opt input:checked+span{background:#2B2B2B;color:#FFFFFF;border-color:#2B2B2B}
+.opt input:focus-visible+span{box-shadow:0 0 0 2px rgba(212,175,55,.45)}
 .ph-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.ph{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--paper-2);border:1px solid var(--line)}
+.ph{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#FAFAFA;border:1px solid #EAEAEA}
 .ph img{width:100%;height:100%;object-fit:cover}
-.ph .x{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(43,41,38,.72);color:#fff;font-size:13px;line-height:22px;text-align:center}
-.ph.add{display:flex;align-items:center;justify-content:center;border-style:dashed;color:var(--muted);font-size:24px;font-weight:300}
-.next-box{border:1px solid var(--line);background:var(--paper-2);border-radius:12px;padding:12px 14px}
-.next-box .big{font-size:20px}
+.ph .x{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(43,43,43,.7);color:#fff;font-size:13px;line-height:22px;text-align:center}
+.ph.add{display:flex;align-items:center;justify-content:center;border:1px dashed #D0D0D0;background:#FAFAFA;color:#B5B5B5;font-size:22px;font-weight:200}
+.next-box{border:1px solid #EAEAEA;background:#FAFAFA;border-radius:8px;padding:14px 16px}
+.next-box .big{font-size:20px;font-weight:400;letter-spacing:.04em}
+.divider-t{font-family:var(--serif);font-size:11px;letter-spacing:.3em;color:#B5B5B5;text-align:center;margin:6px 0 20px;display:flex;align-items:center;gap:14px}
+.divider-t:before,.divider-t:after{content:"";flex:1;height:1px;background:#EFEFEF}
 
 /* modal */
-.modal{position:fixed;inset:0;z-index:50;background:rgba(43,41,38,.28);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(43,43,43,.22);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal.open{opacity:1;pointer-events:auto}
-.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92vh;max-height:92dvh;overflow-y:auto;border-radius:20px 20px 0 0;padding:8px 18px calc(24px + var(--safe-b));transform:translateY(24px);transition:transform .25s;overscroll-behavior:contain}
+.sheet{background:#FFFFFF;width:100%;max-width:600px;max-height:92vh;max-height:92dvh;overflow-y:auto;border-radius:18px 18px 0 0;padding:10px 24px calc(24px + var(--safe-b));transform:translateY(24px);transition:transform .3s cubic-bezier(.2,.8,.2,1);overscroll-behavior:contain;box-shadow:0 -10px 40px rgba(0,0,0,.05)}
 .modal.open .sheet{transform:none}
-.sheet .grab{width:38px;height:4px;background:var(--line-2);border-radius:4px;margin:4px auto 12px}
-.sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.sheet-h h3{margin:0;font-size:20px}
-.sheet-h .close{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);color:var(--muted);font-size:18px;line-height:1}
-.sheet-actions{position:sticky;bottom:calc(-24px - var(--safe-b));background:var(--bg);padding:12px 0 calc(12px + var(--safe-b));margin:0 0 calc(-24px - var(--safe-b));border-top:1px solid var(--line);display:flex;gap:10px}
-.sheet-actions .btn{flex:1}
-@media (min-width:700px){.modal{align-items:center}.sheet{border-radius:20px;max-height:86vh}}
+.sheet .grab{width:36px;height:3px;background:#E5E5E5;border-radius:3px;margin:4px auto 18px}
+.sheet-h{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:26px;padding-bottom:14px;border-bottom:1px solid #E5E5E5}
+.sheet-h h3{margin:0;font-family:'Noto Serif TC',serif;font-size:22px;font-weight:400;letter-spacing:.05em;line-height:1.3}
+.sheet-h .en{display:block;font-family:var(--serif);font-style:italic;font-size:11px;letter-spacing:.2em;color:#AFAFAF;text-transform:uppercase;margin-bottom:4px}
+.sheet-h .close{width:32px;height:32px;color:#8C8C8C;font-size:22px;font-weight:200;line-height:1}
+.sheet-actions{position:sticky;bottom:calc(-24px - var(--safe-b));background:#FFFFFF;padding:14px 0 calc(14px + var(--safe-b));margin:8px 0 calc(-24px - var(--safe-b));border-top:1px solid #EFEFEF;display:flex;gap:8px;align-items:center}
+.btn-text{flex:0 0 auto;padding:12px 14px;font-size:14px;color:#8C8C8C;letter-spacing:.1em;background:none;border:0}
+.btn-text.warn{color:var(--warn);margin-right:auto;padding-left:0}
+.btn-save{flex:1;height:50px;border-radius:8px;background:#2B2B2B;color:#FFFFFF;font-size:14.5px;letter-spacing:.1em;font-weight:400;border:0;transition:background .2s}
+.btn-save:active{background:#000}
+@media (min-width:700px){.modal{align-items:center}.sheet{border-radius:14px;max-height:86vh}}
+
+/* booking sheet */
+.bk-ctx{border:1px solid #E5E5E5;border-radius:8px;padding:16px 18px;margin-bottom:18px}
+.bk-ctx .k{font-size:11px;letter-spacing:.2em;color:#8C8C8C}
+.bk-ctx .ttl{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:.05em;margin:2px 0}
+.bk-shop{border-top:1px solid #EFEFEF;padding:16px 0}
+.bk-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.bk-btn{display:flex;align-items:center;justify-content:center;height:46px;border-radius:8px;border:1px solid #E5E5E5;background:#fff;color:#2B2B2B;font-size:13.5px;letter-spacing:.08em;text-decoration:none}
+.bk-btn.dark{background:#2B2B2B;border-color:#2B2B2B;color:#fff}
+.bk-btn.off{opacity:.35;pointer-events:none}
+.bk-btn.full{grid-column:1/-1}
 
 .lightbox{position:fixed;inset:0;z-index:60;background:rgba(20,18,16,.9);display:none;align-items:center;justify-content:center;padding:16px}
 .lightbox.open{display:flex}
 .lightbox img{max-width:100%;max-height:100%;border-radius:8px}
 
 /* nav */
-.nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(248,245,239,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(250,249,246,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
 .nav .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:var(--nav-h)}
 .nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;color:var(--muted);letter-spacing:.08em}
 .nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
@@ -339,56 +361,69 @@ function toast(msg){
   const t = $('#toast'); t.textContent = msg; t.classList.add('on');
   clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('on'), 2200);
 }
-function download(name, text, type){
+let dlCap;
+function downloadsCap(){
+  if(dlCap === undefined) dlCap = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('downloads').catch(()=>null) : Promise.resolve(null);
+  return dlCap;
+}
+const inClaude = () => !!(window.claude && typeof window.claude.use === 'function');
+async function download(name, text, type){
+  const cap = await downloadsCap();
+  if(cap){
+    try{ await cap.save({filename:name, data:new Blob([text], {type})}); return true; }
+    catch(e){
+      if(e && e.code === 'declined') return false;
+      if(e && (e.code === 'rejected_extension' || e.code === 'extension_not_enabled')){ alert('這個網頁環境不允許下載此類檔案。\n請改用「加入 Google 日曆」，或用瀏覽器直接開啟 index.html 檔案再匯出。'); return false; }
+      if(e && e.code === 'rate_limited'){ toast('請稍後再試'); return false; }
+    }
+  }
+  if(inClaude() && !cap){ alert('這個網頁環境無法下載檔案。請用瀏覽器直接開啟 index.html 檔案再匯出。'); return false; }
   const blob = new Blob([text], {type});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  return true;
 }
 
 /* ============================================================
    儲存層：IndexedDB（照片體積大，不用 localStorage），失敗時退回 localStorage
    ============================================================ */
-let db = null;
-function openDB(){
-  return new Promise((res, rej) => {
-    if(!('indexedDB' in window)) return rej(new Error('no idb'));
-    const r = indexedDB.open(DB_NAME, 1);
-    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
+/* 舊版（v1.0）資料存在 IndexedDB：只讀取一次做搬移 */
+function legacyIDB(){
+  return new Promise(res => {
+    try{
+      if(!('indexedDB' in window)) return res(null);
+      const r = indexedDB.open(DB_NAME, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+      r.onsuccess = () => {
+        try{ const q = r.result.transaction(STORE).objectStore(STORE).get(KEY);
+          q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }catch(e){ res(null); }
+      };
+      r.onerror = () => res(null);
+    }catch(e){ res(null); }
   });
 }
 async function loadState(){
-  try{
-    db = await openDB();
-    const v = await new Promise((res, rej) => {
-      const q = db.transaction(STORE).objectStore(STORE).get(KEY);
-      q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error);
-    });
-    if(v) return v;
-  }catch(e){ db = null; }
   try{ const s = localStorage.getItem(DB_NAME); if(s) return JSON.parse(s); }catch(e){}
-  return null;
+  const old = await legacyIDB();
+  if(old){ state = old; save(true); }
+  return old;
 }
 let saveTimer;
-function save(){
+function save(now){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(async () => {
-    try{
-      if(db){
-        await new Promise((res, rej) => {
-          const tx = db.transaction(STORE, 'readwrite');
-          tx.objectStore(STORE).put(state, KEY);
-          tx.oncomplete = res; tx.onerror = () => rej(tx.error);
-        });
-      } else {
-        localStorage.setItem(DB_NAME, JSON.stringify(state));
-      }
-    }catch(e){ toast('儲存失敗：空間可能不足'); console.error(e); }
-  }, 150);
+  const run = () => {
+    try{ localStorage.setItem(DB_NAME, JSON.stringify(state)); }
+    catch(e){
+      const full = e && (e.name === 'QuotaExceededError' || e.code === 22);
+      toast(full ? '儲存空間已滿：請刪除部分照片或匯出備份' : '儲存失敗');
+      console.error(e);
+    }
+  };
+  now === true ? run() : (saveTimer = setTimeout(run, 150));
 }
+function storageKB(){ try{ return Math.round((localStorage.getItem(DB_NAME)||'').length*2/1024); }catch(e){ return 0; } }
 
 /* ============================================================
    狀態
@@ -488,7 +523,7 @@ function ringHTML(it){
   } else cls += ' none';
   const off = C * (1 - frac);
   const stroke = it.days != null && it.days < 0 ? '#B4452F' : c.c;
-  return `<div class="${cls}">
+  return `<button class="${cls}" data-act="book" data-pet="${it.pet.id}" data-cat="${it.cat}" aria-label="${it.cat} 快速預約">
     <svg viewBox="0 0 84 84" aria-hidden="true">
       <circle class="trk" cx="42" cy="42" r="${R}"/>
       ${frac>0 ? `<circle class="glow" cx="42" cy="42" r="${R}" stroke="${stroke}" stroke-dasharray="${C}" stroke-dashoffset="${off}"/>
@@ -497,7 +532,7 @@ function ringHTML(it){
       <text class="unit" x="42" y="59" text-anchor="middle">${unit}</text>
     </svg>
     <div class="lbl">${c.k}</div><div class="due">${dueTxt}</div>
-  </div>`;
+  </button>`;
 }
 function renderHome(){
   if(!state.pets.length){
@@ -546,14 +581,14 @@ function renderHome(){
         <b>${esc(al.pet.name)} 連續兩次紀錄「皮膚發紅」</b>
         <div class="small" style="color:var(--ink-2);margin-top:2px">${al.recs.map(r=>`${dotDate(r.date)} ${esc(r.category)}`).join('、')}。建議安排門診檢查皮膚狀況，並留意洗劑是否適合。</div>
         <div class="row" style="margin-top:10px">
-          <button class="btn sm" data-act="book">快速預約</button>
+          <button class="btn sm" data-act="book" data-pet="${al.pet.id}" data-cat="門診">快速預約</button>
           <button class="btn sm ghost" data-act="add-record" data-pet="${al.pet.id}" data-cat="門診">記錄門診</button>
         </div>
       </div>
     </div>`).join('')}</section>` : ''}
 
   <section class="sec">
-    <div class="sec-h"><h2>照護倒數<span class="en">Countdown</span></h2><span class="aside">${esc(p.name)}</span></div>
+    <div class="sec-h"><h2>照護倒數<span class="en">Countdown</span></h2><span class="aside">點光環即可預約</span></div>
     <div class="card rings">${rings.map(ringHTML).join('')}</div>
   </section>
 
@@ -569,7 +604,7 @@ function renderHome(){
           </div>
           <div class="acts">
             <button class="btn sm dark" data-act="add-record" data-pet="${t.pet.id}" data-cat="${t.cat}" data-shop="${esc(t.last.shop||'')}">完成</button>
-            <button class="btn sm" data-act="book">預約</button>
+            <button class="btn sm" data-act="book" data-pet="${t.pet.id}" data-cat="${t.cat}">預約</button>
           </div>
         </div>`).join('') : `<div class="empty"><span class="serif">今天沒有待辦</span>好好陪伴毛孩吧。</div>`}
     </div>
@@ -578,7 +613,7 @@ function renderHome(){
   <section class="sec">
     <div class="grid2">
       <button class="btn dark block" data-act="add-record" style="padding:13px">＋ 新增照護紀錄</button>
-      <button class="btn block" data-act="book" style="padding:13px">快速預約</button>
+      <button class="btn block" data-act="book" data-pet="${p.id}" style="padding:13px">一鍵預約</button>
     </div>
   </section>`;
 }
@@ -743,8 +778,7 @@ function buildICS(items){
 }
 function exportICS(items, name){
   if(!items.length){ toast('沒有可匯出的提醒'); return; }
-  download(name, buildICS(items), 'text/calendar;charset=utf-8');
-  toast(`已匯出 ${items.length} 筆提醒`);
+  download(name, buildICS(items), 'text/calendar;charset=utf-8').then(ok => ok && toast(`已匯出 ${items.length} 筆提醒`));
 }
 
 /* ============================================================
@@ -862,6 +896,7 @@ function renderStats(){
             <dt>生日</dt><dd>${p.birthday?dotDate(p.birthday)+'（'+ageText(p.birthday)+'）':'—'}</dd>
             <dt>體重</dt><dd>${w!=null?w+' kg':'—'}</dd>
             <dt>毛質</dt><dd>${esc(p.coat||'—')}</dd>
+            <dt>晶片</dt><dd>${esc(p.chip||'—')}</dd>
             <dt>過敏史</dt><dd>${esc(p.allergies||'無')}</dd>
             <dt>注意</dt><dd>${esc(p.notes||'—')}</dd>
           </dl>
@@ -930,7 +965,7 @@ function renderSettings(){
   <section class="sec">
     <div class="sec-h"><h2>資料備份<span class="en">Backup</span></h2></div>
     <div class="card pad">
-      <p class="small" style="margin:0 0 12px">所有資料只存在這台裝置的瀏覽器中（IndexedDB）。清除瀏覽器資料或換手機前，請先匯出 JSON 備份。</p>
+      <p class="small" style="margin:0 0 12px">所有資料只存在這台裝置的瀏覽器中（localStorage，約 5MB；目前使用 ${(storageKB()/1024).toFixed(1)} MB）。照片最占空間，清除瀏覽器資料或換手機前，請先匯出 JSON 備份。</p>
       <div class="grid2">
         <button class="btn dark" data-act="export-json">匯出 JSON 備份</button>
         <button class="btn" data-act="import-json">匯入 JSON</button>
@@ -941,7 +976,7 @@ function renderSettings(){
         <button class="linkbtn warn" data-act="clear-all">清除全部資料</button>
       </div>
     </div>
-    <p class="small muted" style="text-align:center;margin-top:24px">毛孩日誌 · v1.0 · ${state.pets.length} 隻毛孩 · ${state.records.length} 筆紀錄</p>
+    <p class="small muted" style="text-align:center;margin-top:24px">毛孩日誌 · v1.1 · ${state.pets.length} 隻毛孩 · ${state.records.length} 筆紀錄</p>
   </section>`;
 }
 
@@ -959,8 +994,8 @@ function go(v){ ui.view = v; render(); window.scrollTo({top:0}); }
 /* ============================================================
    Modal / Sheet
    ============================================================ */
-function openSheet(title, body, actions){
-  $('#sheet').innerHTML = `<div class="grab"></div><div class="sheet-h"><h3>${title}</h3><button class="close" data-act="close" aria-label="關閉">×</button></div>${body}${actions?`<div class="sheet-actions">${actions}</div>`:''}`;
+function openSheet(title, body, actions, en=''){
+  $('#sheet').innerHTML = `<div class="grab"></div><div class="sheet-h"><div>${en?`<span class="en">${en}</span>`:''}<h3>${title}</h3></div><button class="close" data-act="close" aria-label="關閉">×</button></div>${body}${actions?`<div class="sheet-actions">${actions}</div>`:''}`;
   $('#sheet').scrollTop = 0;
   $('#modal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -968,8 +1003,8 @@ function openSheet(title, body, actions){
 function closeSheet(){ $('#modal').classList.remove('open'); document.body.style.overflow = ''; }
 $('#modal').addEventListener('click', e => { if(e.target.id === 'modal') closeSheet(); });
 
-/* 圖片壓縮：最長邊 1280px、JPEG 0.8 */
-function compressImage(file, max=1280, q=0.8){
+/* 圖片壓縮：最長邊 960px、JPEG 0.72（localStorage 容量約 5MB） */
+function compressImage(file, max=960, q=0.72){
   return new Promise((res, rej) => {
     const url = URL.createObjectURL(file), img = new Image();
     img.onload = () => {
@@ -1003,7 +1038,7 @@ function recordForm(rec, preset={}){
   openSheet(isNew ? '新增照護紀錄' : '編輯照護紀錄', `
   <form id="recForm" autocomplete="off">
     <div class="field"><span class="flabel">護理類別</span>
-      <div class="opts">${CATS.map(c=>`<label class="opt"><input type="radio" name="category" value="${c.k}" ${r.category===c.k?'checked':''}><span><span class="dot" style="background:${c.c}"></span>${c.k}</span></label>`).join('')}</div></div>
+      <div class="opts">${CATS.map(c=>`<label class="opt"><input type="radio" name="category" value="${c.k}" ${r.category===c.k?'checked':''}><span>${c.k}</span></label>`).join('')}</div></div>
     <div class="grid2">
       <div class="field"><label for="f-pet">寵物</label><select class="inp" id="f-pet" name="petId">${state.pets.map(p=>`<option value="${p.id}" ${p.id===r.petId?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div>
       <div class="field"><label for="f-date">日期</label><input class="inp" type="date" id="f-date" name="date" value="${r.date}" required></div>
@@ -1015,19 +1050,20 @@ function recordForm(rec, preset={}){
       <div class="field"><label for="f-cost">消費金額 (NT$)</label><input class="inp" id="f-cost" name="cost" type="number" step="1" min="0" inputmode="numeric" value="${r.cost??''}" placeholder="1200"></div>
     </div>
     <div class="field"><span class="flabel">皮膚與毛況（可複選）</span>
-      <div class="opts" id="skinOpts">${SKIN.map(s=>`<label class="opt"><input type="checkbox" name="skin" value="${s}" ${r.skin.includes(s)?'checked':''}><span>${s}</span></label>`).join('')}</div></div>
-    <div class="field"><label for="f-prod">洗劑與護理項目</label><textarea class="inp" id="f-prod" name="products" placeholder="例：燕麥低敏洗毛精、護毛素、剪指甲、擠肛門腺">${esc(r.products)}</textarea></div>
-    <div class="field"><label for="f-notes">備註說明</label><textarea class="inp" id="f-notes" name="notes" placeholder="例：美容師說耳朵有點紅，下次換洗劑">${esc(r.notes)}</textarea></div>
+      <div class="opts skin" id="skinOpts">${SKIN.map(s=>`<label class="opt"><input type="checkbox" name="skin" value="${s}" ${r.skin.includes(s)?'checked':''}><span>${s}</span></label>`).join('')}</div></div>
+    <div class="divider-t">DETAILS</div>
+    <div class="field"><label for="f-prod">使用洗劑 / 護理產品</label><textarea class="inp" id="f-prod" name="products" placeholder="例：燕麥低敏洗毛精、護毛素、剪指甲、擠肛門腺">${esc(r.products)}</textarea></div>
+    <div class="field"><label for="f-notes">美容師 / 獸醫叮嚀備註</label><textarea class="inp" id="f-notes" name="notes" placeholder="例：美容師說耳朵有點紅，下次換洗劑">${esc(r.notes)}</textarea></div>
     <div class="field"><span class="flabel">照片紀錄（最多 4 張）</span><div class="ph-grid" id="phGrid"></div>
       <input type="file" id="phInput" accept="image/*" multiple class="hidden"></div>
     <div class="field"><span class="flabel">下次預估執行日期</span>
       <div class="next-box">
         <div class="row between"><div><div class="big" id="nextTxt"></div><div class="small muted" id="nextHint"></div></div>
-        <input class="inp" type="date" id="f-next" style="width:auto;font-size:14px;padding:6px 8px" aria-label="手動調整下次日期"></div>
+        <input class="inp" type="date" id="f-next" style="width:auto;min-height:38px;font-size:14px;padding:6px 10px" aria-label="手動調整下次日期"></div>
         <button type="button" class="linkbtn hidden" id="nextReset" style="margin-top:6px">恢復自動計算</button>
       </div></div>
   </form>`,
-  `${isNew?'':`<button class="btn danger" data-act="del-record" data-id="${r.id}" style="flex:0 0 auto">刪除</button>`}<button class="btn" data-act="close">取消</button><button class="btn dark" id="recSave">${isNew?'儲存紀錄':'儲存變更'}</button>`);
+  `${isNew?'':`<button class="btn-text warn" data-act="del-record" data-id="${r.id}">刪除</button>`}<button class="btn-text" data-act="close">取消</button><button class="btn-save" id="recSave">${isNew?'儲存紀錄':'儲存變更'}</button>`, isNew?'New Care Record':'Edit Care Record');
 
   const f = $('#recForm'), nextIn = $('#f-next');
   const cat = () => f.querySelector('input[name=category]:checked').value;
@@ -1112,11 +1148,12 @@ function petForm(pet){
       <div class="field"><label for="p-bd">生日</label><input class="inp" type="date" id="p-bd" name="birthday" value="${p.birthday}"></div>
       <div class="field"><label for="p-w">體重 (kg)</label><input class="inp" type="number" step="0.01" min="0" inputmode="decimal" id="p-w" name="weight" value="${p.weight??''}"></div>
     </div>
+    <div class="field"><label for="p-chip">晶片號碼</label><input class="inp" id="p-chip" name="chip" inputmode="numeric" value="${esc(p.chip||'')}" placeholder="15 碼晶片號碼"></div>
     <div class="field"><label for="p-coat">毛質</label><input class="inp" id="p-coat" name="coat" list="coatList" value="${esc(p.coat)}" placeholder="捲毛"><datalist id="coatList">${COATS.map(c=>`<option value="${c}">`).join('')}</datalist></div>
     <div class="field"><label for="p-al">過敏史</label><textarea class="inp" id="p-al" name="allergies" placeholder="例：雞肉、某牌洗毛精">${esc(p.allergies)}</textarea></div>
     <div class="field"><label for="p-notes">特殊注意事項</label><textarea class="inp" id="p-notes" name="notes" placeholder="例：怕吹風機、會咬人、心臟病">${esc(p.notes)}</textarea></div>
   </form>`,
-  `${isNew?'':`<button class="btn danger" data-act="del-pet" data-id="${p.id}" style="flex:0 0 auto">刪除</button>`}<button class="btn" data-act="close">取消</button><button class="btn dark" id="petSave">儲存</button>`);
+  `${isNew?'':`<button class="btn-text warn" data-act="del-pet" data-id="${p.id}">刪除</button>`}<button class="btn-text" data-act="close">取消</button><button class="btn-save" id="petSave">儲存檔案</button>`, 'Pet Profile');
   $('#pPhotoBtn').onclick = () => $('#pPhoto').click();
   $('#pAvatar').onclick = () => $('#pPhoto').click();
   $('#pPhotoDel').onclick = () => { p.photo = ''; $('#pAvatar').innerHTML = '＋'; $('#pPhotoDel').classList.add('hidden'); };
@@ -1126,7 +1163,7 @@ function petForm(pet){
   };
   $('#petSave').onclick = () => {
     const f = $('#petForm'); if(!f.reportValidity()) return;
-    Object.assign(p, {name:f.name.value.trim(), species:f.species.value, breed:f.breed.value.trim(), gender:f.gender.value, birthday:f.birthday.value, weight:num(f.weight.value), coat:f.coat.value.trim(), allergies:f.allergies.value.trim(), notes:f.notes.value.trim()});
+    Object.assign(p, {name:f.name.value.trim(), species:f.species.value, breed:f.breed.value.trim(), gender:f.gender.value, birthday:f.birthday.value, weight:num(f.weight.value), coat:f.coat.value.trim(), allergies:f.allergies.value.trim(), notes:f.notes.value.trim(), chip:f.chip.value.trim()});
     if(isNew){ p.created = Date.now(); state.pets.push(p); ui.petId = p.id; }
     else state.pets[state.pets.findIndex(x=>x.id===p.id)] = p;
     save(); closeSheet(); render(); toast(isNew ? `歡迎 ${p.name}！` : '已更新');
@@ -1141,10 +1178,10 @@ function shopForm(shop){
   <form id="shopForm" autocomplete="off">
     <div class="field"><label for="s-name">店家 / 美容師名稱 *</label><input class="inp" id="s-name" name="name" required value="${esc(s.name)}" placeholder="毛日子美容沙龍"></div>
     <div class="field"><label for="s-phone">電話</label><input class="inp" id="s-phone" name="phone" type="tel" inputmode="tel" value="${esc(s.phone)}" placeholder="02-2700-1234"></div>
-    <div class="field"><label for="s-line">LINE ID 或 LINE 連結</label><input class="inp" id="s-line" name="line" value="${esc(s.line)}" placeholder="@maobeauty 或 https://lin.ee/xxxx"></div>
+    <div class="field"><label for="s-line">預約網址 / LINE 連結</label><input class="inp" id="s-line" name="line" value="${esc(s.line)}" placeholder="@maobeauty、https://lin.ee/xxxx 或預約網址"></div>
     <div class="field"><label for="s-note">備註</label><input class="inp" id="s-note" name="note" value="${esc(s.note||'')}" placeholder="營業時間、地址、指定美容師…"></div>
   </form>`,
-  `${isNew?'':`<button class="btn danger" data-act="del-shop" data-id="${s.id}" style="flex:0 0 auto">刪除</button>`}<button class="btn" data-act="close">取消</button><button class="btn dark" id="shopSave">儲存</button>`);
+  `${isNew?'':`<button class="btn-text warn" data-act="del-shop" data-id="${s.id}">刪除</button>`}<button class="btn-text" data-act="close">取消</button><button class="btn-save" id="shopSave">儲存店家</button>`, 'Salon & Clinic');
   $('#shopSave').onclick = () => {
     const f = $('#shopForm'); if(!f.reportValidity()) return;
     Object.assign(s, {name:f.name.value.trim(), phone:f.phone.value.trim(), line:f.line.value.trim(), note:f.note.value.trim()});
@@ -1156,28 +1193,56 @@ function shopForm(shop){
 }
 
 /* ---------- 快速預約 ---------- */
-function lineURL(v){
+function linkURL(v){
   v = v.trim();
   if(/^https?:\/\//i.test(v)) return v;
   if(v.startsWith('@')) return 'https://line.me/R/ti/p/' + encodeURIComponent(v);
+  if(/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(v)) return 'https://' + v;
   return 'https://line.me/ti/p/~' + encodeURIComponent(v);
 }
+const isLine = v => { v = v.trim(); return /line\.me|lin\.ee/i.test(v) || (!/^https?:\/\//i.test(v) && !/\.[a-z]{2,}/i.test(v)); };
 function telURL(v){ return 'tel:' + v.replace(/[^\d+#*,]/g,''); }
-function bookingSheet(){
-  const shops = state.settings.shops.slice(), def = defaultShop();
-  if(def) shops.sort((a,b)=> (a.id===def.id?-1:b.id===def.id?1:0));
-  openSheet('快速預約', shops.length ? `
-    <p class="small muted" style="margin:0 0 14px">直接撥打電話或開啟 LINE 與店家預約（本工具不會自動對接店家行事曆）。</p>
-    ${shops.map((s,i)=>`<div class="card pad" style="margin-bottom:10px">
-      <div class="row between"><div class="serif" style="font-size:17px;font-weight:600">${esc(s.name)}</div>${i===0&&def?'<span class="tag">預設</span>':''}</div>
-      ${s.note?`<div class="small muted">${esc(s.note)}</div>`:''}
-      <div class="grid2" style="margin-top:12px">
-        ${s.phone?`<a class="btn dark" href="${esc(telURL(s.phone))}">☎ 撥打 ${esc(s.phone)}</a>`:`<span class="btn" style="opacity:.4">未設定電話</span>`}
-        ${s.line?`<a class="btn" href="${esc(lineURL(s.line))}" target="_blank" rel="noopener">開啟 LINE</a>`:`<span class="btn" style="opacity:.4">未設定 LINE</span>`}
-      </div></div>`).join('')}
-    <button class="linkbtn" data-act="goto-shops">管理常用店家</button>` : `
-    <div class="empty"><span class="serif">尚未設定常用店家</span>新增店家的電話或 LINE，之後按「快速預約」就能直接聯絡。</div>
-    <button class="btn dark block" data-act="add-shop">＋ 新增常用店家</button>`);
+function gcalURL(it){
+  const day = it.due < today() ? today() : it.due;
+  const q = new URLSearchParams({action:'TEMPLATE', text:`🐾 ${it.pet.name}・${it.cat}`,
+    dates:`${day.replace(/-/g,'')}/${addDays(day,1).replace(/-/g,'')}`,
+    details:`上次：${it.last.date}${it.last.shop?' @ '+it.last.shop:''}\n— 毛孩日誌`});
+  return 'https://calendar.google.com/calendar/render?' + q.toString();
+}
+function shopBlock(s, isDef){
+  const L = s.line ? (isLine(s.line) ? '開啟 LINE' : '前往預約網址') : '未設定連結';
+  return `<div class="bk-shop">
+    <div class="row between"><div class="serif" style="font-size:17px;font-weight:500;letter-spacing:.04em">${esc(s.name)}</div>${isDef?'<span class="small muted" style="letter-spacing:.2em">DEFAULT</span>':''}</div>
+    ${s.note?`<div class="small muted">${esc(s.note)}</div>`:''}
+    <div class="bk-btns">
+      <a class="bk-btn dark ${s.phone?'':'off'}" href="${s.phone?esc(telURL(s.phone)):'#'}">${s.phone?'撥打電話':'未設定電話'}</a>
+      <a class="bk-btn ${s.line?'':'off'}" href="${s.line?esc(linkURL(s.line)):'#'}" target="_blank" rel="noopener">${L}</a>
+    </div></div>`;
+}
+/* 快速預約：自動帶入寵物、項目與預設店家 */
+function bookingSheet(petId, cat){
+  const pet = petById(petId) || petById(ui.petId) || state.pets[0];
+  const def = defaultShop();
+  let it = null;
+  if(pet && cat) it = dueItems(pet.id).find(i=>i.cat===cat) || null;
+  if(pet && !cat){ it = dueItems(pet.id).filter(i=>i.due).sort((a,b)=>a.days-b.days)[0] || null; }
+  const c = it ? it.cat : cat;
+  // 優先使用上次該項目的店家，其次預設店家
+  const lastShop = it?.last?.shop && state.settings.shops.find(s=>s.name===it.last.shop);
+  const main = lastShop || def;
+  const others = state.settings.shops.filter(s=>!main || s.id!==main.id);
+  const ctx = pet ? `<div class="bk-ctx">
+      <div class="k">BOOKING FOR</div>
+      <div class="ttl">${esc(pet.name)}${c?`・${c}`:''}</div>
+      <div class="small muted">${it && it.due ? `預估日期 ${dotDate(it.due)}　${relText(it.days)}` : (it && it.last ? `上次 ${dotDate(it.last.date)}` : '尚無此項目紀錄')}${it?.last?.shop?`　上次店家 ${esc(it.last.shop)}`:''}</div>
+    </div>` : '';
+  const ics = it && it.due ? `<div class="bk-btns" style="margin:0 0 6px">
+      <button class="bk-btn full dark" data-act="ics-one" data-pet="${pet.id}" data-cat="${it.cat}">一鍵匯出手機行事曆 (.ics)</button>
+      <a class="bk-btn full" href="${esc(gcalURL(it))}" target="_blank" rel="noopener">加入 Google 日曆</a>
+    </div>` : '';
+  openSheet('快速預約', ctx + (main ? shopBlock(main, def && main.id===def.id) + others.map(s=>shopBlock(s, def && s.id===def.id)).join('') + `<div class="bk-shop">${ics}<button class="linkbtn" data-act="goto-shops">管理常用店家</button></div>`
+    : `<div class="empty"><span class="serif">尚未設定常用店家</span>新增店家的電話或 LINE／預約網址，之後按「快速預約」就能直接聯絡。</div>
+       <button class="btn-save" style="width:100%;margin-bottom:12px" data-act="add-shop">新增常用店家</button>${ics}`), '', 'Quick Booking');
 }
 
 /* ============================================================
@@ -1188,8 +1253,8 @@ function demoState(){
   const shopA = {id:uid(), name:'毛日子美容沙龍', phone:'02-2700-1234', line:'@maobeauty', note:'指定美容師 Amy · 週一公休'};
   const shopB = {id:uid(), name:'安心動物醫院', phone:'02-2388-5678', line:'', note:'24 小時急診'};
   s.settings.shops = [shopA, shopB]; s.settings.defaultShopId = shopA.id;
-  const mochi = {id:uid(), name:'Mochi', species:'狗', breed:'玩具貴賓', gender:'女生（已結紮）', birthday:addDays(t,-365*4-120), weight:4.1, coat:'捲毛', allergies:'雞肉', notes:'怕吹風機，吹整需中途休息', photo:'', created:Date.now()};
-  const kuma  = {id:uid(), name:'Kuma',  species:'狗', breed:'柴犬', gender:'男生', birthday:addDays(t,-365*6-40), weight:10.2, coat:'雙層毛', allergies:'', notes:'換毛季掉毛量大', photo:'', created:Date.now()};
+  const mochi = {id:uid(), name:'Mochi', species:'狗', breed:'玩具貴賓', gender:'女生（已結紮）', birthday:addDays(t,-365*4-120), weight:4.1, coat:'捲毛', allergies:'雞肉', notes:'怕吹風機，吹整需中途休息', chip:'900138000123456', photo:'', created:Date.now()};
+  const kuma  = {id:uid(), name:'Kuma',  species:'狗', breed:'柴犬', gender:'男生', birthday:addDays(t,-365*6-40), weight:10.2, coat:'雙層毛', allergies:'', notes:'換毛季掉毛量大', chip:'900138000654321', photo:'', created:Date.now()};
   s.pets = [mochi, kuma];
   const R = (pet, cat, n, o={}) => {
     const date = D(n), c = s.settings.cycles[cat];
@@ -1256,7 +1321,7 @@ document.addEventListener('click', async e => {
       break;
     case 'default-shop': state.settings.defaultShopId = id; save(); render(); toast('已設為預設店家'); break;
     case 'goto-shops': closeSheet(); go('settings'); break;
-    case 'book': bookingSheet(); break;
+    case 'book': bookingSheet(el.dataset.pet, el.dataset.cat); break;
     case 'view-photo': {
       const r = state.records.find(x=>x.id===id);
       const lb = $('#lightbox'); lb.querySelector('img').src = r.photos[+el.dataset.i]; lb.classList.add('open'); break;
@@ -1268,14 +1333,13 @@ document.addEventListener('click', async e => {
     }
     case 'cal-day': ui.calSel = el.dataset.v; if(ui.calSel.slice(0,7)!==ui.calMonth) ui.calMonth = ui.calSel.slice(0,7); render(); break;
     case 'cal-today': ui.calSel = today(); ui.calMonth = ui.calSel.slice(0,7); render(); break;
-    case 'ics-all': exportICS(dueItems().filter(i=>i.due), `毛孩照護提醒-${today()}.ics`); break;
+    case 'ics-all': exportICS(dueItems().filter(i=>i.due), `pet-care-reminders-${today().replace(/-/g,'')}.ics`); break;
     case 'ics-one': {
       const it = dueItems(el.dataset.pet).find(i=>i.cat===el.dataset.cat && i.due);
-      if(it) exportICS([it], `${it.pet.name}-${it.cat}-${it.due}.ics`); break;
+      if(it) exportICS([it], `pet-care-${it.due.replace(/-/g,'')}.ics`); break;
     }
     case 'export-json':
-      download(`pet-care-backup-${today().replace(/-/g,'')}.json`, JSON.stringify({app:'pet-care-diary', exportedAt:new Date().toISOString(), ...state}, null, 1), 'application/json');
-      toast('已匯出備份'); break;
+      download(`pet-care-backup-${today().replace(/-/g,'')}.json`, JSON.stringify({app:'pet-care-diary', exportedAt:new Date().toISOString(), ...state}, null, 1), 'application/json').then(ok => ok && toast('已匯出備份')); break;
     case 'import-json': $('#importFile').click(); break;
     case 'demo':
       if(state.pets.length && !confirm('載入示範資料會覆蓋目前的所有資料，確定嗎？')) break;
