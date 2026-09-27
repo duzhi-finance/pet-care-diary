@@ -14,6 +14,6 @@
 
 資料只存在本機瀏覽器，換手機或清除瀏覽器資料前請先匯出 JSON 備份。
 
-`sw.js` 只負責讓 iPhone 以網址開啟 `.ics`（跳出「加入行事曆」）；沒有它 App 其他功能照常運作。
+`ics-test.html` 是行事曆匯入測試頁，可用來確認各種匯出方式在自己的手機上是否有效。`sw.js` 已停用，只負責移除舊版安裝的 Service Worker。
 
 內嵌 [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)（MIT License, © Kazuhiko Arase）。

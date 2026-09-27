@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>行事曆匯入測試</title>
+<style>
+  :root{color-scheme:light;--bg:#F8F7F4;--ink:#2B2B2B;--muted:#8E8E93;--line:#ECEBE8}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC',sans-serif;line-height:1.7}
+  main{max-width:560px;margin:0 auto;padding:28px 16px 60px}
+  h1{font-size:24px;font-weight:600;margin:0 0 6px}
+  p{margin:0 0 14px;color:var(--muted);font-size:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0}
+  .card b{font-size:16px}
+  .card .how{font-size:13px;color:var(--muted);margin:2px 0 12px}
+  button{width:100%;height:48px;border-radius:12px;border:0;background:var(--ink);color:#fff;font-size:15px;letter-spacing:.04em;cursor:pointer}
+  button:disabled{opacity:.35}
+  .env{font-size:12px;color:var(--muted);word-break:break-all;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+  ol{padding-left:20px;font-size:14px;margin:0}
+</style>
+</head>
+<body>
+<main>
+  <h1>行事曆匯入測試</h1>
+  <p>四個按鈕用四種不同方式匯出「明天」的一筆整日事件，標題分別是「毛孩日誌測試 A／B／C／D」。</p>
+  <div class="card">
+    <ol>
+      <li>依序按 A、B、C、D，每按一個就照畫面提示操作（繼續、加入…）。</li>
+      <li>全部按完後，打開「行事曆」App，搜尋「<b>毛孩日誌測試</b>」。</li>
+      <li>告訴 Claude 搜得到哪幾個字母，以及是用 iPhone 還是 iPad、Safari 還是主畫面圖示。</li>
+    </ol>
+  </div>
+
+  <div class="card"><b>A・data: 連結</b><div class="how">把行事曆內容直接放在連結裡開啟（毛孩日誌目前在 iPhone／iPad 用的方式）</div><button id="a">測試 A</button></div>
+  <div class="card"><b>B・blob: 連結</b><div class="how">在瀏覽器記憶體產生暫時檔案後開啟</div><button id="b">測試 B</button></div>
+  <div class="card"><b>C・下載檔案</b><div class="how">以下載方式存成 .ics 檔（毛孩日誌最早的方式）</div><button id="c">測試 C</button></div>
+  <div class="card"><b>D・分享選單</b><div class="how">透過系統分享選單傳送 .ics 檔，在清單中選「行事曆」</div><button id="d">測試 D</button></div>
+
+  <p style="margin-top:22px">你的環境（回報時可一併截圖）：</p>
+  <div class="env" id="env"></div>
+</main>
+<script>
+'use strict';
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+function ics(letter){
+  const t = new Date(); t.setDate(t.getDate() + 1);
+  const t2 = new Date(t); t2.setDate(t.getDate() + 1);
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  return [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//PetCareDiary//ZH-TW', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:pcd-test-${letter}-${Date.now()}@pet-care-diary`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${ymd(t)}`,
+    `DTEND;VALUE=DATE:${ymd(t2)}`,
+    `SUMMARY:毛孩日誌測試 ${letter}`,
+    `DESCRIPTION:匯入方式 ${letter} 測試成功`,
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:毛孩日誌測試', 'TRIGGER:PT9H', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n') + '\r\n';
+}
+const file = l => new File([ics(l)], `pet-care-test-${l.toLowerCase()}.ics`, {type:'text/calendar'});
+
+document.getElementById('a').onclick = () => {
+  location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics('A'));
+};
+document.getElementById('b').onclick = () => {
+  location.href = URL.createObjectURL(new Blob([ics('B')], {type:'text/calendar'}));
+};
+document.getElementById('c').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics('C')], {type:'text/calendar'}));
+  a.download = 'pet-care-test-c.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+};
+const dBtn = document.getElementById('d');
+if(!(navigator.canShare && navigator.canShare({files:[file('D')]}))){ dBtn.disabled = true; dBtn.textContent = '此裝置不支援分享檔案'; }
+dBtn.onclick = () => navigator.share({files:[file('D')], title:'毛孩日誌測試 D'}).catch(()=>{});
+
+const standalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+document.getElementById('env').textContent =
+  `開啟方式：${standalone ? '主畫面 App' : '瀏覽器分頁'}\n${navigator.userAgent}`;
+</script>
+</body>
+</html>
