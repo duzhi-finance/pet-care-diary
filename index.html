@@ -522,6 +522,24 @@ async function download(name, data, type){
   return true;
 }
 
+/* iPhone：.ics 要以真正的網址開啟（由 sw.js 回應），Safari 才會跳出「加入行事曆」 */
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+function initSW(){
+  if(!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol) || inClaude()) return;
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+async function openICSviaURL(name, text){
+  if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller || !('caches' in window)) return false;
+  try{
+    const url = new URL('ics/' + name, location.href);
+    const c = await caches.open('pcd-ics');
+    await c.put(url.origin + url.pathname, new Response(text, {headers:{'Content-Type':'text/calendar; charset=utf-8', 'Content-Disposition':'inline'}}));
+    location.href = url.href;
+    return true;
+  }catch(e){ return false; }
+}
+
 /* ============================================================
    儲存層：localStorage（舊版 IndexedDB 資料只讀取一次做搬移）
    ============================================================ */
@@ -959,7 +977,7 @@ function renderCalendar(){
       <p style="margin:0 0 12px" class="small">將所有「下次預估日期」與消耗品補貨提醒匯出成 .ics 檔，用手機行事曆 App 開啟匯入，由手機負責推播通知。每個事件會在<b>前一天 09:00</b>與<b>當天 09:00</b>各提醒一次。</p>
       <p class="small muted" style="margin:0 0 16px">目前共有 ${upcoming.length} 筆提醒（已逾期的項目會排在今天；補貨提醒排在用完前 7 天）。新增紀錄後，記得再匯出一次。</p>
       <button class="btn dark block" data-act="ics-all" ${upcoming.length?'':'disabled'}>匯出至手機行事曆 (.ics)</button>
-      <div class="hint" style="margin-top:10px">iPhone：開啟檔案後按「<b>加入全部</b>」（單筆則按右上角 ✓），才會真正存進行事曆。Android：用 Google 日曆或三星日曆開啟即可匯入。</div>
+      <div class="hint" style="margin-top:10px">iPhone 會跳出「<b>加入全部</b>」，按下才會儲存。Android：用 Google 日曆或三星日曆開啟下載的檔案即可匯入。</div>
     </div>
   </section>`;
 }
@@ -1004,12 +1022,15 @@ function buildICS(events){
   L.push('END:VCALENDAR');
   return L.map(icsFold).join('\r\n') + '\r\n';
 }
-function exportICS(events, name){
+async function exportICS(events, name){
   if(!events.length){ toast('沒有可匯出的提醒'); return; }
-  download(name, buildICS(events), 'text/calendar;charset=utf-8').then(ok => {
-    if(!ok) return;
-    notice(`已匯出 ${events.length} 筆提醒 📅\n\n接下來請在跳出的行事曆畫面：\n・iPhone 單筆：按右上角 ✓\n・iPhone 多筆：按「加入全部」\n\n按下後才會真正存進行事曆；日期是預估執行日，要翻到那天才看得到。`);
-  });
+  const text = buildICS(events);
+  if(isIOS && await openICSviaURL(name, text)) return;   // iPhone：交給 Safari 的「加入行事曆」
+  const ok = await download(name, text, 'text/calendar;charset=utf-8');
+  if(!ok) return;
+  notice(isIOS
+    ? `已匯出 ${events.length} 筆提醒。\n\n如果只看到預覽畫面、沒有「加入」按鈕：\n1. 按預覽畫面左上角的分享鍵，選「行事曆」；或\n2. 用 Safari 開啟本網站（不要從主畫面圖示），再匯出一次。`
+    : `已匯出 ${events.length} 筆提醒 📅\n\n請開啟下載的 .ics 檔，選擇加入行事曆（Google 日曆、三星日曆或 Outlook 皆可）。日期為預估執行日。`);
 }
 
 /* ============================================================
@@ -1545,7 +1566,7 @@ function bookingSheet(petId, cat){
   const ics = ev ? `<div class="bk-shop"><div class="bk-btns" style="margin:0">
       <button class="bk-btn full dark" data-act="ics-one" data-pet="${pet.id}" data-cat="${it.cat}">一鍵匯出手機行事曆 (.ics)</button>
     </div>
-    <div class="hint" style="margin-top:8px">iPhone：開啟後按右上角 <b>✓</b> 才會存進行事曆。<a class="linkbtn" href="${esc(gcalURL(ev))}" target="_blank" rel="noopener" style="margin-left:4px">或改用 Google 日曆</a></div></div>` : '';
+    <div class="hint" style="margin-top:8px">iPhone 會跳出「加入行事曆」，按下才會儲存。<a class="linkbtn" href="${esc(gcalURL(ev))}" target="_blank" rel="noopener" style="margin-left:4px">或改用 Google 日曆</a></div></div>` : '';
   openSheet('快速預約', ctx + (main
     ? shopBlock(main, def && main.id===def.id) + others.map(s=>shopBlock(s, def && s.id===def.id)).join('') + ics + `<button class="linkbtn" data-act="goto-shops">管理常用店家</button>`
     : `<div class="empty"><span class="serif">尚未設定常用店家</span>新增店家的電話或 LINE／預約網址，之後按「快速預約」就能直接聯絡。</div>
@@ -1873,6 +1894,7 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeSheet()
   ui.petId = state.pets[0]?.id || null;
   ui.statPet = ui.petId;
   render();
+  initSW();
 })();
 </script>
 </body>
