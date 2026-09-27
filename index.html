@@ -132,6 +132,28 @@ h1,h2,h3,.serif{font-family:var(--serif);font-weight:500;letter-spacing:.04em}
 .kpi .l{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.06em}
 @media (max-width:380px){.kpis{grid-template-columns:repeat(2,1fr)}}
 
+/* today banner */
+.today{background:var(--warn-bg);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px;border:1px solid #EAD6D1}
+.today-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.today-h .bell{width:30px;height:30px;border-radius:50%;background:var(--warn-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+.today-h b{font-family:var(--serif);font-size:17px;font-weight:500;color:var(--warn-ink)}
+.today-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(160,99,91,.15)}
+.today-row:first-of-type{border-top:0}
+.today-row .t{flex:1;min-width:0;font-size:14px}
+.today-row .t .muted{font-size:12px}
+.today .btn{background:rgba(255,255,255,.75);border-color:transparent}
+/* overview (all pets) */
+.ov{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:640px){.ov{grid-template-columns:1fr 1fr}}
+.ov-card{padding:18px 20px;text-align:left;width:100%}
+.ov-top{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.ov-top .avatar{width:52px;height:52px;font-size:20px}
+.ov-name{font-family:var(--serif);font-size:20px;letter-spacing:.12em;text-transform:uppercase;line-height:1.2}
+.ov-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
+.ov-item .when{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.note{display:flex;gap:10px;font-size:12.5px;color:var(--muted);line-height:1.7;padding:16px 18px;border:1px dashed var(--line-2);border-radius:var(--radius);margin-top:30px}
+.note b{color:var(--ink-2);font-weight:500}
+
 /* alert */
 .alert{background:var(--warn-bg);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;display:flex;gap:12px}
 .alert .ico{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--warn-ink);color:var(--warn-ink);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px}
@@ -594,7 +616,7 @@ function normalize(s){
   return s;
 }
 let state = blankState();
-const ui = { view:'home', petId:null, tlCat:'全部', tlPet:'all', calMonth:today().slice(0,7), calSel:today(), statPet:null, statYear:new Date().getFullYear() };
+const ui = { view:'home', petId:null, homeAll:false, tlCat:'全部', tlPet:'all', calMonth:today().slice(0,7), calSel:today(), statPet:null, statYear:new Date().getFullYear() };
 
 /* ============================================================
    資料推導
@@ -653,6 +675,17 @@ function supplyInfo(s){
 }
 const suppliesOf = petId => state.supplies.filter(s => !s.petId || !petId || s.petId === petId)
   .map(s => ({s, ...supplyInfo(s)})).sort((a,b)=>a.left-b.left);
+
+/* 今天到期或已逾期（照護 + 消耗品） */
+function urgentItems(){
+  const care = dueItems().filter(i => i.due && i.days <= 0).map(i => ({kind:'care', ...i, sort:i.days}));
+  const sup = suppliesOf().filter(x => x.left <= 0).map(x => ({kind:'sup', ...x, sort:x.left}));
+  return [...care, ...sup].sort((a,b) => a.sort - b.sort);
+}
+const urgentText = u => u.kind === 'care'
+  ? `${u.pet.name}・${u.cat}　${u.days === 0 ? '今天到期' : `已逾期 ${-u.days} 天`}`
+  : `補貨・${u.s.name}　${u.left === 0 ? '今天用完' : `已超過 ${-u.left} 天`}`;
+function backupAge(){ const d = state.settings.lastBackup; return d ? diffDays(d, today()) : null; }
 
 /* ============================================================
    畫面：首頁
@@ -750,6 +783,19 @@ function supplyRow(x){
     </div>
   </div>`;
 }
+function overviewCards(){
+  return `<section class="ov">${state.pets.map(pet => {
+    const items = dueItems(pet.id).filter(i => i.due).sort((a,b) => a.days - b.days).slice(0,4);
+    const w = latestWeight(pet), skin = skinAlerts().some(a => a.pet.id === pet.id);
+    return `<button class="card ov-card" data-act="pick-pet" data-id="${pet.id}">
+      <div class="ov-top"><span class="av-ring" style="padding:3px">${avatarHTML(pet)}</span>
+        <div style="min-width:0"><div class="ov-name">${esc(pet.name)}</div>
+        <div class="small muted">${esc([pet.breed, ageText(pet.birthday)!=='—'?ageText(pet.birthday):'', w!=null?w+' kg':''].filter(Boolean).join(' · '))}</div></div></div>
+      ${skin ? '<div style="margin-bottom:6px"><span class="badge warn">皮膚發紅 ×2，建議看診</span></div>' : ''}
+      ${items.length ? items.map(i => `<div class="ov-item"><span>${i.cat}</span>${i.days < 0 ? `<span class="badge warn">逾期 ${-i.days} 天</span>` : i.days === 0 ? '<span class="badge gold">今天</span>' : `<span class="when">${i.days} 天後 · ${md(i.due)}</span>`}</div>`).join('')
+        : '<div class="ov-item"><span class="muted">尚無照護紀錄</span></div>'}
+    </button>`; }).join('')}</section>`;
+}
 function renderHome(){
   if(!state.pets.length){
     return masthead('毛孩日誌','Pet Care Diary') + `
@@ -763,16 +809,34 @@ function renderHome(){
     </div>`;
   }
   if(!petById(ui.petId)) ui.petId = state.pets[0].id;
+  const all = ui.homeAll && state.pets.length > 1;
   const p = petById(ui.petId);
   const alerts = skinAlerts();
   const rings = dueItems(p.id);
-  const sups = suppliesOf(p.id);
+  const sups = suppliesOf(all ? null : p.id);
   const todos = dueItems().filter(i => i.due && i.days <= 3).sort((x,y)=>x.days-y.days);
   const supTodos = suppliesOf().filter(x => x.left <= 3);
+  const urgent = urgentItems();
+  const bAge = backupAge();
 
   return masthead('毛孩日誌','Pet Care Diary') + `
-  ${petChips(ui.petId,'pick-pet')}
-  ${identityCard(p)}
+  ${urgent.length ? `<section class="today" role="alert">
+    <div class="today-h"><span class="bell">!</span><b>今日提醒 · ${urgent.length} 項需要處理</b></div>
+    ${urgent.map(u => u.kind === 'care' ? `<div class="today-row">
+        <div class="t">${esc(u.pet.name)}・${u.cat}<br><span class="muted">${u.days === 0 ? '今天到期' : `已逾期 ${-u.days} 天`} · 預估 ${dotDate(u.due)}</span></div>
+        <button class="btn sm" data-act="add-record" data-pet="${u.pet.id}" data-cat="${u.cat}" data-shop="${esc(u.last.shop||'')}">完成</button>
+        <button class="btn sm" data-act="book" data-pet="${u.pet.id}" data-cat="${u.cat}">預約</button>
+      </div>` : `<div class="today-row">
+        <div class="t">補貨・${esc(u.s.name)}<br><span class="muted">${u.left === 0 ? '今天用完' : `已超過預估 ${-u.left} 天`}</span></div>
+        ${u.s.url ? `<a class="btn sm" href="${esc(safeURL(u.s.url))}" target="_blank" rel="noopener">補貨</a>` : ''}
+        <button class="btn sm" data-act="restock" data-id="${u.s.id}">已換新</button>
+      </div>`).join('')}
+  </section>` : ''}
+  ${state.pets.length > 1 ? `<div class="chips">
+    <button class="chip ${all?'on':''}" data-act="pick-all">全部毛孩</button>
+    ${state.pets.map(x=>`<button class="chip ${!all && x.id===p.id?'on':''}" data-act="pick-pet" data-id="${x.id}">${esc(x.name)}</button>`).join('')}
+  </div>` : ''}
+  ${all ? overviewCards() : identityCard(p)}
 
   ${alerts.length ? `<section class="sec" style="margin-bottom:0">${alerts.map(al=>`
     <div class="alert">
@@ -787,10 +851,10 @@ function renderHome(){
       </div>
     </div>`).join('')}</section>` : ''}
 
-  <section class="sec">
+  ${all ? '' : `<section class="sec">
     <div class="sec-h"><h2>照護倒數<span class="en">Countdown</span></h2><span class="aside">點圓環即可預約</span></div>
     <div class="card rings">${rings.map(ringHTML).join('')}</div>
-  </section>
+  </section>`}
 
   <section class="sec">
     <div class="sec-h"><h2>今日待辦<span class="en">To-do</span></h2><span class="aside">逾期與 3 天內</span></div>
@@ -825,9 +889,16 @@ function renderHome(){
   <section class="sec">
     <div class="grid2">
       <button class="btn dark block" data-act="add-record" style="padding:14px">＋ 新增照護紀錄</button>
-      <button class="btn block" data-act="book" data-pet="${p.id}" style="padding:14px">一鍵預約</button>
+      <button class="btn block" data-act="book" data-pet="${all ? '' : p.id}" style="padding:14px">一鍵預約</button>
     </div>
-  </section>`;
+  </section>
+
+  <div class="note"><span>ⓘ</span><div>
+    <b>本工具沒有主動通知功能</b>，不會推播提醒，請記得定期打開查看今日提醒。<br>
+    資料只儲存在<b>這台裝置的這個瀏覽器</b>，換裝置或清除瀏覽器資料就會遺失。
+    ${bAge == null ? '<b>你還沒有備份過</b>，' : bAge > 30 ? `上次備份是 <b>${bAge} 天前</b>，` : `上次備份：${dotDate(state.settings.lastBackup)}。`}
+    <button class="linkbtn" style="text-decoration:underline" data-act="goto-backup">前往匯出備份</button>
+  </div></div>`;
 }
 
 /* ============================================================
@@ -1163,9 +1234,10 @@ function renderSettings(){
       </div>`).join('') : `<div class="empty">新增常用的美容店或動物醫院，「快速預約」就能一鍵撥號或開啟 LINE。</div>`}</div>
   </section>
 
-  <section class="sec">
-    <div class="sec-h"><h2>資料備份<span class="en">Backup</span></h2></div>
+  <section class="sec" id="backup">
+    <div class="sec-h"><h2>資料備份<span class="en">Backup</span></h2><span class="aside">${backupAge()==null ? '尚未備份' : `上次備份 ${dotDate(state.settings.lastBackup)}`}</span></div>
     <div class="card pad">
+      <p class="small" style="margin:0 0 10px"><b>⚠ 本工具沒有主動通知功能</b>，不會推播提醒，請記得定期打開查看首頁的「今日提醒」。</p>
       <p class="small" style="margin:0 0 14px">所有資料只存在這台裝置的瀏覽器中（localStorage，約 5MB；目前使用 ${(storageKB()/1024).toFixed(1)} MB）。照片最占空間，清除瀏覽器資料或換手機前，請先匯出 JSON 備份。</p>
       <div class="grid2">
         <button class="btn dark" data-act="export-json">匯出 JSON 備份</button>
@@ -1248,6 +1320,7 @@ function recordForm(rec, preset={}){
       <div class="field"><label for="f-pet">寵物</label><select class="inp" id="f-pet" name="petId">${state.pets.map(p=>`<option value="${p.id}" ${p.id===r.petId?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div>
       <div class="field"><label for="f-date">日期</label><input class="inp" type="date" id="f-date" name="date" value="${r.date}" required></div>
     </div>
+    ${isNew ? `<div id="copyWrap" class="hidden" style="margin:-8px 0 22px"><button type="button" class="btn sm" id="copyLast" style="width:100%;justify-content:flex-start;gap:8px;padding:10px 16px">⎘ <span id="copyLabel"></span></button></div>` : ''}
     <div class="field"><label for="f-shop">服務店家 / 美容師</label><input class="inp" id="f-shop" name="shop" list="shopList" value="${esc(r.shop)}" placeholder="例：毛日子美容沙龍 / Amy">
       <datalist id="shopList">${shopNames.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div>
     <div class="grid2">
@@ -1283,6 +1356,25 @@ function recordForm(rec, preset={}){
   }
   if(!isNew && r.nextDate) nextIn.value = r.nextDate;
   refreshNext();
+
+  /* 複製上次：同一隻毛孩、同一類別最近一筆的店家、洗劑、金額 */
+  const lastOf = () => state.records.filter(x=>x.petId===f.petId.value && x.category===cat()).sort(byDateDesc)[0];
+  function refreshCopy(){
+    if(!isNew) return;
+    const prev = lastOf();
+    $('#copyWrap').classList.toggle('hidden', !prev);
+    if(prev) $('#copyLabel').textContent = `複製上次紀錄（${md(prev.date)}${prev.shop ? ' · ' + prev.shop : ''}）`;
+  }
+  if(isNew){
+    $('#copyLast').onclick = () => {
+      const prev = lastOf(); if(!prev) return;
+      f.shop.value = prev.shop || ''; f.shop.dataset.touched = '1';
+      f.products.value = prev.products || '';
+      if(num(prev.cost) != null) f.cost.value = prev.cost;
+      toast(`已帶入 ${md(prev.date)} 的店家、洗劑與金額`);
+    };
+    refreshCopy();
+  }
   f.addEventListener('change', e => {
     if(e.target.name === 'skin'){
       const boxes = [...f.querySelectorAll('input[name=skin]')];
@@ -1294,6 +1386,7 @@ function recordForm(rec, preset={}){
       if(prev && prev.shop && !f.shop.dataset.touched) f.shop.value = prev.shop;
     }
     if(e.target === nextIn) manual = true;
+    if(e.target.name === 'category' || e.target.name === 'petId') refreshCopy();
     refreshNext();
   });
   f.shop.addEventListener('input', () => f.shop.dataset.touched = '1');
@@ -1686,7 +1779,9 @@ document.addEventListener('click', async e => {
   switch(a){
     case 'nav': go(el.dataset.v); break;
     case 'close': closeSheet(); break;
-    case 'pick-pet': ui.petId = id; render(); break;
+    case 'pick-pet': ui.petId = id; ui.homeAll = false; render(); if(ui.view==='home') window.scrollTo({top:0, behavior:'smooth'}); break;
+    case 'pick-all': ui.homeAll = true; render(); break;
+    case 'goto-backup': go('settings'); setTimeout(()=>document.getElementById('backup')?.scrollIntoView({behavior:'smooth'}), 50); break;
     case 'tl-cat': ui.tlCat = el.dataset.v; render(); break;
     case 'tl-pet': ui.tlPet = id; render(); break;
     case 'stat-pet': ui.statPet = id; render(); break;
@@ -1747,11 +1842,12 @@ document.addEventListener('click', async e => {
     case 'cal-day': ui.calSel = el.dataset.v; if(ui.calSel.slice(0,7)!==ui.calMonth) ui.calMonth = ui.calSel.slice(0,7); render(); break;
     case 'cal-today': ui.calSel = today(); ui.calMonth = ui.calSel.slice(0,7); render(); break;
     case 'export-json':
-      download(`pet-care-backup-${today().replace(/-/g,'')}.json`, JSON.stringify({app:'pet-care-diary', exportedAt:new Date().toISOString(), ...state}, null, 1), 'application/json').then(ok => ok && toast('已匯出備份')); break;
+      download(`pet-care-backup-${today().replace(/-/g,'')}.json`, JSON.stringify({app:'pet-care-diary', exportedAt:new Date().toISOString(), ...state}, null, 1), 'application/json')
+        .then(ok => { if(!ok) return; state.settings.lastBackup = today(); save(); render(); toast('已匯出備份'); }); break;
     case 'import-json': $('#importFile').click(); break;
     case 'demo':
       if(state.pets.length && !await ask('載入示範資料會覆蓋目前的所有資料，確定嗎？', '覆蓋並載入')) break;
-      state = normalize(demoState()); ui.petId = state.pets[0].id; ui.statPet = ui.petId; save(); go('home'); toast('已載入示範資料'); break;
+      state = normalize(demoState()); ui.petId = state.pets[0].id; ui.statPet = ui.petId; ui.homeAll = state.pets.length > 1; save(); go('home'); toast('已載入示範資料'); break;
     case 'clear-all':
       if(await ask('確定清除全部資料？此動作無法復原，建議先匯出備份。', '下一步') && await ask('再次確認：真的要清除全部資料嗎？', '清除全部')){
         state = blankState(); save(); go('home'); toast('已清除');
@@ -1783,7 +1879,7 @@ $('#importFile').addEventListener('change', async e => {
     if(!Array.isArray(data.pets) || !Array.isArray(data.records)) throw new Error('格式不符');
     if(!await ask(`備份內含 ${data.pets.length} 隻毛孩、${data.records.length} 筆紀錄。\n匯入將取代目前資料，確定嗎？`, '匯入')) return;
     delete data.app; delete data.exportedAt;
-    state = normalize(data); ui.petId = state.pets[0]?.id || null; save(); go('home'); toast('匯入完成');
+    state = normalize(data); ui.petId = state.pets[0]?.id || null; ui.homeAll = state.pets.length > 1; save(); go('home'); toast('匯入完成');
   }catch(err){ notice('匯入失敗：' + err.message); }
 });
 document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeSheet(); $('#lightbox').classList.remove('open'); } });
@@ -1800,6 +1896,15 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeSheet()
   addEventListener('scroll', () => tip.classList.remove('on'), {passive:true});
 })();
 
+/* 每天第一次打開：若有今天到期或已逾期的項目，跳出提醒 */
+function dailyReminder(){
+  const u = urgentItems(); if(!u.length) return;
+  let seen = null; try{ seen = localStorage.getItem('pcd-reminded'); }catch(e){}
+  if(seen === today()) return;
+  try{ localStorage.setItem('pcd-reminded', today()); }catch(e){}
+  ask(`🔔 今日提醒\n\n${u.slice(0,6).map(x => '・' + urgentText(x)).join('\n')}${u.length > 6 ? `\n…還有 ${u.length-6} 項` : ''}\n\n詳細內容在首頁最上方。`, '知道了', false);
+}
+
 /* ============================================================
    啟動
    ============================================================ */
@@ -1807,7 +1912,9 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeSheet()
   state = normalize(await loadState());
   ui.petId = state.pets[0]?.id || null;
   ui.statPet = ui.petId;
+  ui.homeAll = state.pets.length > 1;
   render();
+  dailyReminder();
   cleanupSW();
 })();
 </script>
