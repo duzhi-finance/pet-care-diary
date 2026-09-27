@@ -1,15 +1,7 @@
-/* 毛孩日誌 Service Worker
-   唯一用途：把 App 產生的 .ics 以「真正的網址」回應（Content-Type: text/calendar），
-   iPhone Safari 才會跳出「加入行事曆 / 加入全部」，而不是只顯示檔案預覽。 */
-const ICS_CACHE = 'pcd-ics';
+/* 毛孩日誌：此 Service Worker 已停用。
+   舊版曾用它匯出 .ics，但 iOS 匯入時會另外向伺服器下載而取得 404。
+   現在改用 data: 連結匯出；此檔只負責把已安裝的舊版 Service Worker 自動移除。 */
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  if(url.origin !== self.location.origin || !/\/ics\/[^/]+\.ics$/.test(url.pathname)) return;
-  e.respondWith(
-    caches.open(ICS_CACHE)
-      .then(c => c.match(url.origin + url.pathname))
-      .then(r => r || new Response('行事曆檔案已過期，請回到毛孩日誌重新匯出。', {status:404, headers:{'Content-Type':'text/plain; charset=utf-8'}}))
-  );
-});
+self.addEventListener('activate', e => e.waitUntil(
+  self.registration.unregister().then(() => self.clients.matchAll()).then(cs => cs.forEach(c => c.navigate(c.url)))
+));
