@@ -510,7 +510,7 @@ async function download(name, data, type){
     try{ await cap.save({filename:name, data:blob}); return true; }
     catch(e){
       if(e && e.code === 'declined') return false;
-      if(e && (e.code === 'rejected_extension' || e.code === 'extension_not_enabled')){ notice('這個網頁環境不允許下載此類檔案。\n請改用「加入 Google 日曆」，或用瀏覽器直接開啟 index.html 檔案再匯出。'); return false; }
+      if(e && (e.code === 'rejected_extension' || e.code === 'extension_not_enabled')){ notice('這個網頁環境不允許下載此類檔案，請用瀏覽器直接開啟網站再匯出。'); return false; }
       if(e && e.code === 'rate_limited'){ toast('請稍後再試'); return false; }
     }
   }
@@ -522,14 +522,6 @@ async function download(name, data, type){
   return true;
 }
 
-/* iPhone / iPad：把整份 .ics 內容放進 data: 連結直接開啟。
-   iOS 會跳出「有可用的日曆檔案」，按「繼續」後由系統讀取連結內容匯入，
-   不需要再向伺服器下載（資料只存在本機，伺服器上沒有這個檔案）。 */
-const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-function openICSviaDataURL(text){
-  try{ location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text); return true; }
-  catch(e){ return false; }
-}
 /* 舊版曾註冊 sw.js；現在不再需要，登出以免殘留 */
 function cleanupSW(){
   if(!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol) || inClaude()) return;
@@ -934,7 +926,6 @@ function renderCalendar(){
   }
   const sd = done[ui.calSel] || [], sp = pend[ui.calSel] || [];
   const sel = parseD(ui.calSel);
-  const upcoming = allEvents();
   return masthead('行程與行事曆','Schedule') + `
   <section class="card">
     <div class="cal-h">
@@ -957,7 +948,7 @@ function renderCalendar(){
         </div>` : `<div class="todo">
           <span class="mk ${x.days<0?'over':'pend'}" style="width:11px;height:11px"></span>
           <div class="body"><div class="ttl">${esc(x.pet.name)}・${x.cat}</div><div class="small muted">待辦提醒 · ${relText(x.days)}</div></div>
-          <div class="acts"><button class="btn sm" data-act="book" data-pet="${x.pet.id}" data-cat="${x.cat}">預約 / 匯出</button></div>
+          <div class="acts"><button class="btn sm" data-act="book" data-pet="${x.pet.id}" data-cat="${x.cat}">預約</button></div>
         </div>`).join('')}
       ${sd.map(r=>`<div class="todo">
           <span class="mk done" style="width:11px;height:11px"></span>
@@ -967,66 +958,7 @@ function renderCalendar(){
     </div>
   </section>
 
-  <section class="sec">
-    <div class="sec-h"><h2>匯出提醒<span class="en">Export .ics</span></h2></div>
-    <div class="card pad">
-      <p style="margin:0 0 12px" class="small">將所有「下次預估日期」與消耗品補貨提醒匯出成 .ics 檔，用手機行事曆 App 開啟匯入，由手機負責推播通知。每個事件會在<b>前一天 09:00</b>與<b>當天 09:00</b>各提醒一次。</p>
-      <p class="small muted" style="margin:0 0 16px">目前共有 ${upcoming.length} 筆提醒（已逾期的項目會排在今天；補貨提醒排在用完前 7 天）。新增紀錄後，記得再匯出一次。</p>
-      <button class="btn dark block" data-act="ics-all" ${upcoming.length?'':'disabled'}>匯出至手機行事曆 (.ics)</button>
-      <div class="hint" style="margin-top:10px">iPhone / iPad 會跳出「有可用的日曆檔案」，按「<b>繼續</b>」後再按「<b>加入全部</b>」。Android：用 Google 日曆或三星日曆開啟下載的檔案即可匯入。</div>
-    </div>
-  </section>`;
-}
-
-/* ============================================================
-   .ics 產生器
-   ============================================================ */
-function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n'); }
-function icsFold(line){
-  // RFC 5545：每行不超過 75 octets（UTF-8），續行以空白開頭；不拆開跳脫序列
-  const enc = new TextEncoder(); let out = '', cur = '', len = 0;
-  for(const ch of line.match(/\\.|[\s\S]/gu) || []){
-    const b = enc.encode(ch).length;
-    if(len + b > 73){ out += cur + '\r\n '; cur = ''; len = 1; }
-    cur += ch; len += b;
-  }
-  return out + cur;
-}
-function careEvent(it){
-  const t = today();
-  return {uid:`${it.pet.id}-${encodeURIComponent(it.cat)}-${it.last.id}`, date:it.due < t ? t : it.due,
-    title:`🐾 ${it.pet.name}・${it.cat}`, alarm:`${it.pet.name} ${it.cat}`,
-    desc:[`上次：${it.last.date}${it.last.shop?' @ '+it.last.shop:''}`, it.cycle?`週期：${it.cycle} 天`:'', it.due < t ? `原預估日 ${it.due}（已逾期）`:'', '— 毛孩日誌'].filter(Boolean).join('\n')};
-}
-function supplyEvent(x){
-  const t = today(), d = addDays(x.end, -7);
-  return {uid:`sup-${x.s.id}-${x.s.start}`, date:d < t ? t : d, title:`🛒 補貨提醒：${x.s.name}`, alarm:`補貨：${x.s.name}`,
-    desc:[`預計 ${x.end} 用完`, x.s.url?`補貨連結：${x.s.url}`:'', '— 毛孩日誌'].filter(Boolean).join('\n')};
-}
-const allEvents = () => [...dueItems().filter(i=>i.due).map(careEvent), ...suppliesOf().map(supplyEvent)];
-function buildICS(events){
-  const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
-  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//PetCareDiary//ZH-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:毛孩照護提醒'];
-  for(const e of events){
-    L.push('BEGIN:VEVENT', `UID:${e.uid}@pet-care-diary`, `DTSTAMP:${stamp}`,
-      `DTSTART;VALUE=DATE:${e.date.replace(/-/g,'')}`, `DTEND;VALUE=DATE:${addDays(e.date,1).replace(/-/g,'')}`,
-      `SUMMARY:${icsEsc(e.title)}`, `DESCRIPTION:${icsEsc(e.desc)}`, 'TRANSP:TRANSPARENT',
-      'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc('明天：'+e.alarm)}`,'TRIGGER:-PT15H','END:VALARM',
-      'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc('今天：'+e.alarm)}`,'TRIGGER:PT9H','END:VALARM',
-      'END:VEVENT');
-  }
-  L.push('END:VCALENDAR');
-  return L.map(icsFold).join('\r\n') + '\r\n';
-}
-async function exportICS(events, name){
-  if(!events.length){ toast('沒有可匯出的提醒'); return; }
-  const text = buildICS(events);
-  if(isIOS && !inClaude() && openICSviaDataURL(text)) return;   // iPhone / iPad：交給系統的「加入行事曆」
-  const ok = await download(name, text, 'text/calendar;charset=utf-8');
-  if(!ok) return;
-  notice(isIOS
-    ? `已匯出 ${events.length} 筆提醒。\n\n如果只看到預覽畫面、沒有「加入」按鈕，請用 Safari 開啟本網站（不要從主畫面圖示）再匯出一次。`
-    : `已匯出 ${events.length} 筆提醒 📅\n\n請開啟下載的 .ics 檔，選擇加入行事曆（Google 日曆、三星日曆或 Outlook 皆可）。日期為預估執行日。`);
+`;
 }
 
 /* ============================================================
@@ -1527,10 +1459,6 @@ function linkURL(v){
 }
 const isLine = v => { v = v.trim(); return /line\.me|lin\.ee/i.test(v) || (!/^https?:\/\//i.test(v) && !/\.[a-z]{2,}/i.test(v)); };
 function telURL(v){ return 'tel:' + v.replace(/[^\d+#*,]/g,''); }
-function gcalURL(e){
-  const q = new URLSearchParams({action:'TEMPLATE', text:e.title, dates:`${e.date.replace(/-/g,'')}/${addDays(e.date,1).replace(/-/g,'')}`, details:e.desc});
-  return 'https://calendar.google.com/calendar/render?' + q.toString();
-}
 function shopBlock(s, isDef){
   const btns = [
     `<a class="bk-btn ${s.phone?'':'off'}" href="${s.phone?esc(telURL(s.phone)):'#'}">${s.phone?'撥打電話':'未設定電話'}</a>`,
@@ -1558,15 +1486,10 @@ function bookingSheet(petId, cat){
       <div class="ttl">${esc(pet.name)}${c?`・${c}`:''}</div>
       <div class="small muted">${it && it.due ? `預估日期 ${dotDate(it.due)}　${relText(it.days)}` : (it && it.last ? `上次 ${dotDate(it.last.date)}` : '尚無此項目紀錄')}${it?.last?.shop?`　上次店家 ${esc(it.last.shop)}`:''}</div>
     </div>` : '';
-  const ev = it && it.due ? careEvent(it) : null;
-  const ics = ev ? `<div class="bk-shop"><div class="bk-btns" style="margin:0">
-      <button class="bk-btn full dark" data-act="ics-one" data-pet="${pet.id}" data-cat="${it.cat}">一鍵匯出手機行事曆 (.ics)</button>
-    </div>
-    <div class="hint" style="margin-top:8px">iPhone / iPad 會跳出「有可用的日曆檔案」，按「繼續」再按「加入」。<a class="linkbtn" href="${esc(gcalURL(ev))}" target="_blank" rel="noopener" style="margin-left:4px">或改用 Google 日曆</a></div></div>` : '';
   openSheet('快速預約', ctx + (main
-    ? shopBlock(main, def && main.id===def.id) + others.map(s=>shopBlock(s, def && s.id===def.id)).join('') + ics + `<button class="linkbtn" data-act="goto-shops">管理常用店家</button>`
+    ? shopBlock(main, def && main.id===def.id) + others.map(s=>shopBlock(s, def && s.id===def.id)).join('') + `<button class="linkbtn" data-act="goto-shops">管理常用店家</button>`
     : `<div class="empty"><span class="serif">尚未設定常用店家</span>新增店家的電話或 LINE／預約網址，之後按「快速預約」就能直接聯絡。</div>
-       <button class="btn-save" style="width:100%;margin-bottom:12px" data-act="add-shop">新增常用店家</button>${ics}`), '', 'Quick Booking');
+       <button class="btn-save" style="width:100%;margin-bottom:12px" data-act="add-shop">新增常用店家</button>`), '', 'Quick Booking');
 }
 
 /* ============================================================
@@ -1823,11 +1746,6 @@ document.addEventListener('click', async e => {
     }
     case 'cal-day': ui.calSel = el.dataset.v; if(ui.calSel.slice(0,7)!==ui.calMonth) ui.calMonth = ui.calSel.slice(0,7); render(); break;
     case 'cal-today': ui.calSel = today(); ui.calMonth = ui.calSel.slice(0,7); render(); break;
-    case 'ics-all': exportICS(allEvents(), `pet-care-reminders-${today().replace(/-/g,'')}.ics`); break;
-    case 'ics-one': {
-      const it = dueItems(el.dataset.pet).find(i=>i.cat===el.dataset.cat && i.due);
-      if(it) exportICS([careEvent(it)], `pet-care-${it.due.replace(/-/g,'')}.ics`); break;
-    }
     case 'export-json':
       download(`pet-care-backup-${today().replace(/-/g,'')}.json`, JSON.stringify({app:'pet-care-diary', exportedAt:new Date().toISOString(), ...state}, null, 1), 'application/json').then(ok => ok && toast('已匯出備份')); break;
     case 'import-json': $('#importFile').click(); break;
