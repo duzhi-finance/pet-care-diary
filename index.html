@@ -510,7 +510,7 @@ async function download(name, data, type){
     try{ await cap.save({filename:name, data:blob}); return true; }
     catch(e){
       if(e && e.code === 'declined') return false;
-      if(e && (e.code === 'rejected_extension' || e.code === 'extension_not_enabled')){ notice('這個網頁環境不允許下載此類檔案。\n請改用「加入 Google 日曆」，或用瀏覽器直接開啟 index.html 檔案再匯出。'); return false; }
+      if(e && (e.code === 'rejected_extension' || e.code === 'extension_not_enabled')){ notice('這個網頁環境不允許下載此類檔案，請用瀏覽器直接開啟網站再匯出。'); return false; }
       if(e && e.code === 'rate_limited'){ toast('請稍後再試'); return false; }
     }
   }
@@ -961,15 +961,6 @@ function renderCalendar(){
 `;
 }
 
-/* ============================================================
-   提醒事件（供「加入 Google 日曆」連結使用）
-   ============================================================ */
-function careEvent(it){
-  const t = today();
-  return {uid:`${it.pet.id}-${encodeURIComponent(it.cat)}-${it.last.id}`, date:it.due < t ? t : it.due,
-    title:`🐾 ${it.pet.name}・${it.cat}`, alarm:`${it.pet.name} ${it.cat}`,
-    desc:[`上次：${it.last.date}${it.last.shop?' @ '+it.last.shop:''}`, it.cycle?`週期：${it.cycle} 天`:'', it.due < t ? `原預估日 ${it.due}（已逾期）`:'', '— 毛孩日誌'].filter(Boolean).join('\n')};
-}
 /* ============================================================
    畫面：數據統計（SVG 圖表，無外部相依）
    ============================================================ */
@@ -1468,10 +1459,6 @@ function linkURL(v){
 }
 const isLine = v => { v = v.trim(); return /line\.me|lin\.ee/i.test(v) || (!/^https?:\/\//i.test(v) && !/\.[a-z]{2,}/i.test(v)); };
 function telURL(v){ return 'tel:' + v.replace(/[^\d+#*,]/g,''); }
-function gcalURL(e){
-  const q = new URLSearchParams({action:'TEMPLATE', text:e.title, dates:`${e.date.replace(/-/g,'')}/${addDays(e.date,1).replace(/-/g,'')}`, details:e.desc});
-  return 'https://calendar.google.com/calendar/render?' + q.toString();
-}
 function shopBlock(s, isDef){
   const btns = [
     `<a class="bk-btn ${s.phone?'':'off'}" href="${s.phone?esc(telURL(s.phone)):'#'}">${s.phone?'撥打電話':'未設定電話'}</a>`,
@@ -1499,12 +1486,10 @@ function bookingSheet(petId, cat){
       <div class="ttl">${esc(pet.name)}${c?`・${c}`:''}</div>
       <div class="small muted">${it && it.due ? `預估日期 ${dotDate(it.due)}　${relText(it.days)}` : (it && it.last ? `上次 ${dotDate(it.last.date)}` : '尚無此項目紀錄')}${it?.last?.shop?`　上次店家 ${esc(it.last.shop)}`:''}</div>
     </div>` : '';
-  const ev = it && it.due ? careEvent(it) : null;
-  const gcal = ev ? `<div class="bk-shop" style="padding-top:14px"><a class="linkbtn" href="${esc(gcalURL(ev))}" target="_blank" rel="noopener">＋ 加入 Google 日曆</a></div>` : '';
   openSheet('快速預約', ctx + (main
-    ? shopBlock(main, def && main.id===def.id) + others.map(s=>shopBlock(s, def && s.id===def.id)).join('') + gcal + `<button class="linkbtn" data-act="goto-shops">管理常用店家</button>`
+    ? shopBlock(main, def && main.id===def.id) + others.map(s=>shopBlock(s, def && s.id===def.id)).join('') + `<button class="linkbtn" data-act="goto-shops">管理常用店家</button>`
     : `<div class="empty"><span class="serif">尚未設定常用店家</span>新增店家的電話或 LINE／預約網址，之後按「快速預約」就能直接聯絡。</div>
-       <button class="btn-save" style="width:100%;margin-bottom:12px" data-act="add-shop">新增常用店家</button>${gcal}`), '', 'Quick Booking');
+       <button class="btn-save" style="width:100%;margin-bottom:12px" data-act="add-shop">新增常用店家</button>`), '', 'Quick Booking');
 }
 
 /* ============================================================
