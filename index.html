@@ -578,6 +578,7 @@ function normalize(s){
   s.settings.owner = Object.assign({name:'', phone:''}, s.settings.owner || {});
   for(const k of ['pets','records','supplies']) s[k] = Array.isArray(s[k]) ? s[k] : [];
   s.settings.shops = Array.isArray(s.settings.shops) ? s.settings.shops : [];
+  s.settings.shops.forEach(sh => { sh.url = sh.url || ''; if(sh.line && !isLine(sh.line) && !sh.url){ sh.url = sh.line; sh.line = ''; } });
   s.records.forEach(r => {
     r.skin = r.skin || []; r.photos = r.photos || [];
     r.photoTags = Array.isArray(r.photoTags) ? r.photoTags : r.photos.map(()=> '');
@@ -709,7 +710,7 @@ function ringHTML(it){
   if(it.cycle === 0 && !it.due){ cls += ' none'; dueTxt = it.last ? `上次 ${md(it.last.date)}` : '不定期'; unit='不提醒'; }
   else if(it.due){
     frac = Math.max(0, Math.min(1, it.days / (it.cycle || 1)));
-    numTxt = Math.abs(it.days); unit = it.days < 0 ? '逾期天' : (it.days===0 ? '今天' : '天');
+    numTxt = Math.abs(it.days); unit = it.days < 0 ? '已逾期' : (it.days===0 ? '今天' : '天後');
     dueTxt = md(it.due);
     if(it.days < 0){ cls += ' over'; frac = 1; pill = `<span class="badge warn" style="margin-top:4px">逾期 ${-it.days} 天</span>`; }
     else if(it.days <= 3){ cls += ' soon'; if(it.days === 0) frac = 1; dueTxt = `${md(it.due)} · ${relText(it.days)}`; }
@@ -790,10 +791,10 @@ function renderHome(){
     <div class="card">
       ${todos.map(t=>`
         <div class="todo">
-          <div class="when ${t.days<0?'over':''}"><div class="d">${t.days<0?-t.days:t.days===0?'今':t.days}</div><div class="t">${t.days<0?'天前到期':t.days===0?'TODAY':'天後'}</div></div>
+          <div class="when ${t.days<0?'over':''}"><div class="d">${t.days<0?-t.days:t.days===0?'0':t.days}</div><div class="t">${t.days<0?'已逾期':t.days===0?'今天':'天後'}</div></div>
           <div class="body">
             <div class="ttl">${esc(t.pet.name)}・${t.cat}</div>
-            <div class="small muted">預估 ${dotDate(t.due)}　上次 ${dotDate(t.last.date)}${t.last.shop?` @ ${esc(t.last.shop)}`:''}</div>
+            <div class="small muted">${t.days<0?`<span class="badge warn" style="margin-right:6px">逾期 ${-t.days} 天</span>`:''}預估 ${dotDate(t.due)}　上次 ${dotDate(t.last.date)}${t.last.shop?` @ ${esc(t.last.shop)}`:''}</div>
           </div>
           <div class="acts">
             <button class="btn sm dark" data-act="add-record" data-pet="${t.pet.id}" data-cat="${t.cat}" data-shop="${esc(t.last.shop||'')}">完成</button>
@@ -802,7 +803,7 @@ function renderHome(){
         </div>`).join('')}
       ${supTodos.map(x=>`
         <div class="todo">
-          <div class="when ${x.left<0?'over':''}"><div class="d">${Math.abs(x.left)}</div><div class="t">${x.left<0?'天前用完':'天後用完'}</div></div>
+          <div class="when ${x.left<0?'over':''}"><div class="d">${Math.abs(x.left)}</div><div class="t">${x.left<0?'已逾期':'天後用完'}</div></div>
           <div class="body"><div class="ttl">補貨・${esc(x.s.name)}</div><div class="small muted">預計 ${dotDate(x.end)} 用完</div></div>
           <div class="acts">${x.s.url?`<a class="btn sm rose" href="${esc(safeURL(x.s.url))}" target="_blank" rel="noopener">補貨</a>`:''}<button class="btn sm" data-act="restock" data-id="${x.s.id}">已換新</button></div>
         </div>`).join('')}
@@ -1031,7 +1032,19 @@ function weightChart(pts, target){
   const line = pts.map((p,i)=>`${i?'L':'M'}${X(p.x).toFixed(1)},${Y(p.y).toFixed(1)}`).join('');
   const area = line + `L${X(pts[pts.length-1].x).toFixed(1)},${H-B}L${X(pts[0].x).toFixed(1)},${H-B}Z`;
   const last = pts[pts.length-1];
-  const xl = [pts[0], pts.length>1 ? last : null].filter(Boolean).map((p,i)=>`<text x="${X(p.x)}" y="${H-8}" text-anchor="${pts.length===1?'middle':i?'end':'start'}" font-size="10" fill="#8E8E93">${dotDate(p.x)}</text>`).join('');
+  const xl = (() => {
+    if(pts.length === 1) return `<text x="${X(pts[0].x)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#8E8E93">${dotDate(pts[0].x)}</text>`;
+    const n = Math.min(pts.length, 4), idx = [...new Set(Array.from({length:n}, (_,k)=>Math.round(k*(pts.length-1)/(n-1))))];
+    let lastX = -1e9; const out = [];
+    idx.forEach((ix,k) => {
+      const x = X(pts[ix].x), end = k === idx.length-1;
+      if(!end && x - lastX < 70) return;
+      if(end && out.length && x - lastX < 70) out.pop();
+      out.push(`<text x="${x}" y="${H-8}" text-anchor="${k===0?'start':end?'end':'middle'}" font-size="10" fill="#8E8E93">${dotDate(pts[ix].x)}</text>`);
+      lastX = x;
+    });
+    return out.join('');
+  })();
   const tgt = target != null ? `<line x1="${L}" x2="${W-R}" y1="${Y(target)}" y2="${Y(target)}" stroke="#B5B5B5" stroke-width="1.2" stroke-dasharray="4 4"/>
     <text x="${L+4}" y="${Y(target)-5}" font-size="10" fill="#8E8E93">理想 ${target} kg</text>` : '';
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="體重趨勢圖">
@@ -1039,7 +1052,7 @@ function weightChart(pts, target){
     ${grid}${tgt}
     <path d="${area}" fill="url(#wg)"/>
     <path d="${line}" fill="none" stroke="#2B2B2B" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    ${pts.map(p=>`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="#fff" stroke="#2B2B2B" stroke-width="2"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="14" fill="transparent" data-tip="${dotDate(p.x)}\n${p.y} kg${p.c?' · '+p.c:''}"/>`).join('')}
+    ${pts.map(p=>`<circle class="wpt" cx="${X(p.x)}" cy="${Y(p.y)}" r="${pts.length>20?2.5:4}" fill="#fff" stroke="#2B2B2B" stroke-width="${pts.length>20?1.5:2}"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="14" fill="transparent" data-tip="${dotDate(p.x)}\n${p.y} kg${p.c?' · '+p.c:''}"/>`).join('')}
     <text x="${Math.min(X(last.x), W-R)}" y="${Y(last.y)-10}" text-anchor="${pts.length===1?'middle':'end'}" font-size="11" font-weight="500" fill="#2B2B2B">${last.y} kg</text>
     ${xl}
   </svg>`;
@@ -1191,7 +1204,7 @@ function renderSettings(){
     <div class="card">${shops.length ? shops.map(s=>`
       <div class="list-item">
         <div class="grow"><div class="bk-name" style="font-size:15.5px">${esc(s.name)}${def&&def.id===s.id?'<span class="badge gold">預設</span>':''}</div>
-          <div class="small muted">${esc([s.phone && '☎ '+s.phone, s.line && s.line].filter(Boolean).join('　')||'—')}</div></div>
+          <div class="small muted">${esc([s.phone && '☎ '+s.phone, s.line && 'LINE '+s.line, s.url && '線上預約'].filter(Boolean).join('　')||'—')}</div></div>
         ${def&&def.id===s.id?'':`<button class="linkbtn" data-act="default-shop" data-id="${s.id}">設為預設</button>`}
         <button class="linkbtn" data-act="edit-shop" data-id="${s.id}">編輯</button>
       </div>`).join('') : `<div class="empty">新增常用的美容店或動物醫院，「快速預約」就能一鍵撥號或開啟 LINE。</div>`}</div>
@@ -1434,17 +1447,19 @@ function petForm(pet){
 /* ---------- 店家表單 ---------- */
 function shopForm(shop){
   const isNew = !shop;
-  const s = shop ? {...shop} : {id:uid(), name:'', phone:'', line:'', note:''};
+  const s = shop ? {...shop} : {id:uid(), name:'', phone:'', line:'', url:'', note:''};
   openSheet(isNew ? '新增常用店家' : '編輯店家', `
   <form id="shopForm" autocomplete="off">
     <div class="field"><label for="s-name">店家 / 美容師名稱 *</label><input class="inp" id="s-name" name="name" required value="${esc(s.name)}" placeholder="毛日子美容沙龍"></div>
     <div class="field"><label for="s-phone">電話</label><input class="inp" id="s-phone" name="phone" type="tel" inputmode="tel" value="${esc(s.phone)}" placeholder="02-2700-1234"></div>
-    <div class="field"><label for="s-line">預約網址 / LINE 連結</label><input class="inp" id="s-line" name="line" value="${esc(s.line)}" placeholder="@maobeauty、https://lin.ee/xxxx 或預約網址"></div>
+    <div class="field"><label for="s-line">LINE ID</label><input class="inp" id="s-line" name="line" value="${esc(s.line)}" placeholder="@maobeauty（官方帳號）或個人 ID，也可貼 LINE 連結" autocapitalize="off" autocorrect="off">
+      <div class="hint">官方帳號請保留開頭的 @；「快速預約」會直接開啟 LINE 對話。</div></div>
+    <div class="field"><label for="s-url">預約網址</label><input class="inp" id="s-url" name="url" type="url" inputmode="url" value="${esc(s.url||'')}" placeholder="https://… 線上預約頁（選填）"></div>
     <div class="field"><label for="s-note">備註</label><input class="inp" id="s-note" name="note" value="${esc(s.note||'')}" placeholder="營業時間、地址、指定美容師…"></div>
   </form>`, actionsHTML(isNew, 'del-shop', s.id, 'shopSave', '儲存店家'), 'Salon & Clinic');
   $('#shopSave').onclick = () => {
     const f = $('#shopForm'); if(!f.reportValidity()) return;
-    Object.assign(s, {name:f.name.value.trim(), phone:f.phone.value.trim(), line:f.line.value.trim(), note:f.note.value.trim()});
+    Object.assign(s, {name:f.name.value.trim(), phone:f.phone.value.trim(), line:f.line.value.trim(), url:f.url.value.trim(), note:f.note.value.trim()});
     const list = state.settings.shops;
     if(isNew){ list.push(s); if(!state.settings.defaultShopId) state.settings.defaultShopId = s.id; }
     else list[list.findIndex(x=>x.id===s.id)] = s;
@@ -1496,14 +1511,15 @@ function gcalURL(e){
   return 'https://calendar.google.com/calendar/render?' + q.toString();
 }
 function shopBlock(s, isDef){
-  const L = s.line ? (isLine(s.line) ? '開啟 LINE' : '前往預約網址') : '未設定連結';
+  const btns = [
+    `<a class="bk-btn ${s.phone?'':'off'}" href="${s.phone?esc(telURL(s.phone)):'#'}">${s.phone?'撥打電話':'未設定電話'}</a>`,
+    `<a class="bk-btn ${s.line?'':'off'}" href="${s.line?esc(linkURL(s.line)):'#'}" target="_blank" rel="noopener">${s.line?'開啟 LINE':'未設定 LINE'}</a>`,
+  ];
+  if(s.url) btns.push(`<a class="bk-btn full" href="${esc(safeURL(s.url))}" target="_blank" rel="noopener">前往線上預約</a>`);
   return `<div class="bk-shop">
     <div class="bk-name">${esc(s.name)}${isDef?'<span class="badge gold">預設</span>':''}</div>
     ${s.note?`<div class="small muted">${esc(s.note)}</div>`:''}
-    <div class="bk-btns">
-      <a class="bk-btn ${s.phone?'':'off'}" href="${s.phone?esc(telURL(s.phone)):'#'}">${s.phone?'撥打電話':'未設定電話'}</a>
-      <a class="bk-btn ${s.line?'':'off'}" href="${s.line?esc(linkURL(s.line)):'#'}" target="_blank" rel="noopener">${L}</a>
-    </div></div>`;
+    <div class="bk-btns">${btns.join('')}</div></div>`;
 }
 /* 快速預約：自動帶入寵物、項目與預設店家 */
 function bookingSheet(petId, cat){
@@ -1675,7 +1691,7 @@ function demoPhoto(label, sub, bg, fg){
 function demoState(){
   const s = blankState(), t = today(), D = n => addDays(t, -n);
   const shopA = {id:uid(), name:'毛日子美容沙龍', phone:'02-2700-1234', line:'@maobeauty', note:'指定美容師 Amy · 週一公休'};
-  const shopB = {id:uid(), name:'安心動物醫院', phone:'02-2388-5678', line:'https://www.example.com/booking', note:'24 小時急診'};
+  const shopB = {id:uid(), name:'安心動物醫院', phone:'02-2388-5678', line:'@anxinvet', url:'https://www.example.com/booking', note:'24 小時急診'};
   s.settings.shops = [shopA, shopB]; s.settings.defaultShopId = shopA.id;
   s.settings.owner = {name:'王小姐', phone:'0912-345-678'};
   const mochi = {id:uid(), name:'Mochi', species:'狗', breed:'玩具貴賓', gender:'女生（已結紮）', birthday:addDays(t,-365*4-120), weight:4.1, targetWeight:4.0, coat:'捲毛',
