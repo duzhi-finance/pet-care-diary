@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'CG';font-style:italic;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-400-italic.woff2') format('woff2')}
+@font-face{font-family:'CG';font-style:italic;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-italic.woff2') format('woff2')}
+@font-face{font-family:'CG';font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'CG';font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2') format('woff2')}
+html,body{margin:0;padding:0;background:#fff}
+.icon{width:512px;height:512px;display:block}
+</style></head>
+<body>
+<!-- 方案 A：古典字母襯線標章 -->
+<svg id="a" class="icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#F8F7F4"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="#2B2B2B" stroke-opacity=".10" stroke-width="2"/>
+  <text x="248" y="345" text-anchor="middle" font-family="CG" font-style="italic" font-weight="400" font-size="290" fill="#2B2B2B">P</text>
+  <!-- 極細 4 角香檳金星芒 -->
+  <path d="M348 132 C351 150 356 155 374 158 C356 161 351 166 348 184 C345 166 340 161 322 158 C340 155 345 150 348 132 Z" fill="#D4AF37"/>
+  <text x="256" y="430" text-anchor="middle" font-family="CG" font-style="normal" font-weight="500" font-size="22" letter-spacing="7" fill="#8E8E93">PET CARE DIARY</text>
+</svg>
+
+<!-- 方案 B：極細線條寵物剪影（貓狗側臉相依） -->
+<svg id="b" class="icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#FDFDFD"/>
+  <rect x="1" y="1" width="510" height="510" fill="none" stroke="#000" stroke-opacity=".04" stroke-width="2"/>
+  <g fill="none" stroke="#2B2B2B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 貓：尖耳、圓臉，面向右 -->
+    <path d="M150 300 C140 250 150 210 170 190 L162 132 L205 168 C222 162 244 162 262 168 L300 134 L298 192 C318 214 324 250 312 290 C298 334 262 352 228 352 C190 352 160 334 150 300 Z"/>
+    <path d="M214 262 q8 -8 16 0"/><path d="M266 262 q8 -8 16 0"/>
+    <path d="M246 290 l-8 8 h16 z"/>
+    <!-- 狗：垂耳、長吻，面向左並靠向貓 -->
+    <path d="M300 214 C318 186 356 176 386 188 C414 198 428 226 424 262 C422 280 430 300 436 318 C414 322 404 306 400 292 C394 322 376 346 346 356 C330 361 314 360 302 354"/>
+    <path d="M394 196 C414 204 438 236 440 276 C441 298 432 310 420 304"/>
+    <path d="M338 246 q8 -8 16 0"/>
+    <path d="M300 318 q10 10 26 6"/>
+  </g>
+  <text x="256" y="432" text-anchor="middle" font-family="CG" font-style="normal" font-weight="500" font-size="26" letter-spacing="10" fill="#2B2B2B">P E T</text>
+</svg>
+
+<!-- 方案 C：品牌小名牌 -->
+<svg id="c" class="icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#2A2A2A"/>
+  <!-- 吊環 -->
+  <circle cx="256" cy="140" r="26" fill="none" stroke="#F8F7F4" stroke-width="5"/>
+  <!-- 圓形名牌 -->
+  <circle cx="256" cy="280" r="118" fill="#F8F7F4"/>
+  <circle cx="256" cy="280" r="104" fill="none" stroke="#2A2A2A" stroke-opacity=".18" stroke-width="2"/>
+  <circle cx="256" cy="182" r="7" fill="#2A2A2A"/>
+  <text x="256" y="296" text-anchor="middle" font-family="CG" font-style="normal" font-weight="600" font-size="46" letter-spacing="8" fill="#2A2A2A">MY PET</text>
+  <line x1="222" y1="318" x2="290" y2="318" stroke="#2A2A2A" stroke-opacity=".35" stroke-width="2"/>
+  <text x="256" y="348" text-anchor="middle" font-family="CG" font-style="italic" font-weight="400" font-size="22" letter-spacing="2" fill="#8E8E93">care diary</text>
+</svg>
+</body></html>
