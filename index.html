@@ -10,7 +10,7 @@
 <title>毛孩日誌</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    Design tokens — Muted Editorial（高訂韓系極簡）
@@ -41,8 +41,9 @@
   --radius:16px;
   --r:10px;
   --shadow:0 2px 10px rgba(0,0,0,.02);
-  --serif:'Noto Serif TC','Playfair Display','Songti TC','PMingLiU',serif;
-  --sans:-apple-system,BlinkMacSystemFont,'Inter','PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;
+  --serif:'Noto Serif TC','Songti TC','MingLiU',serif;
+  --sans:'Noto Serif TC','Songti TC','MingLiU',serif;
+  --latin:'Cormorant Garamond','Playfair Display','Noto Serif TC',serif;
   --nav-h:64px;
   --side:0px;
   --safe-b:env(safe-area-inset-bottom,0px);
@@ -427,6 +428,48 @@ select.inp{background:#FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .toast.on{opacity:1;transform:translateX(-50%)}
 .tip{position:fixed;z-index:80;background:var(--ink);color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;pointer-events:none;white-space:pre;opacity:0;transition:opacity .12s;line-height:1.5}
 .tip.on{opacity:1}
+
+/* ============================================================
+   高訂雜誌襯線字體 —— 全站強制套用
+   ============================================================ */
+/* 1. 全域與預設字體（含所有卡片、Modal、表單、按鈕） */
+body, input, select, textarea, button, .modal, .sheet, .card, .dialog, .toast, .tip, .nav, .chart text {
+  font-family:'Noto Serif TC','Songti TC','MingLiU',serif !important;
+  -webkit-font-smoothing:antialiased;
+}
+.chart text{font-family:'Noto Serif TC','Songti TC','MingLiU',serif !important}
+/* 2. 所有中文標題（大標題、卡片標題、Modal 標題、欄位 Label） */
+h1, h2, h3, h4, h5, h6,
+.title, .card-title, .modal-title, .label, .pet-name, .section-header,
+.idc-name, .ov-name, .pp-name, .rec-cat, .todo .ttl, .sup-name, .bk-name, .bk-ctx .ttl, .cal-h .ttl, .today-h b,
+.field > label, .flabel, .idc-row .l, .kv dt, .pp-dl dt, .kpi .l {
+  font-family:'Noto Serif TC',serif !important;
+  font-weight:400 !important;
+  letter-spacing:.05em !important;
+}
+h1, h2, h3, h4, h5, h6, .title, .card-title, .modal-title, .pet-name, .section-header,
+.idc-name, .ov-name, .pp-name, .rec-cat, .todo .ttl, .sup-name, .bk-name, .bk-ctx .ttl, .cal-h .ttl, .today-h b { color:#2B2B2B !important }
+/* 3. 所有英文副標題（Supplies、Pets、Care Journal、To-do…） */
+.subtitle, .en-title, .sub-header, em, i,
+.sec-h .en, .sheet-h .en, .mast .sub, .rec-cat .en, .nav .brand small, .no, .empty-st .en {
+  font-family:'Cormorant Garamond','Playfair Display',serif !important;
+  font-style:italic !important;
+  font-weight:400 !important;
+  color:#8E8E93 !important;
+}
+.subtitle, .en-title, .sub-header, .sec-h .en, .rec-cat .en { margin-left:8px }
+.sec-h .en, .rec-cat .en { font-size:14px !important; letter-spacing:.03em }
+.sheet-h .en, .mast .sub { font-size:14.5px !important; letter-spacing:.04em }
+/* 4. 關鍵數據與數字（體重、天數、金額） */
+.number, .count, .price, .days, .weight-value,
+.kpi .v, .big, .todo .when .d, .rec-date .dd, .cost, .leg-row .v, .ring .num, .cal .day .n, .month-h, .kicker, .chip-no {
+  font-family:'Cormorant Garamond','Noto Serif TC',serif !important;
+  font-weight:500 !important;
+  font-variant-numeric:lining-nums tabular-nums;
+}
+.kpi .v, .big, .todo .when .d, .rec-date .dd, .ring .num { letter-spacing:.01em }
+.kpi .v{font-size:23px} .rec-date .dd{font-size:32px} .todo .when .d{font-size:24px} .big{font-size:32px} .cost{font-size:17px}
+.kpi .v small, .big small { font-family:'Noto Serif TC',serif !important; font-weight:400 !important }
 </style>
 </head>
 <body>
@@ -1234,7 +1277,7 @@ function weightChart(pts, target){
 function donut(parts, total){
   const S = 170, cx = 85, cy = 85, r0 = 56, r1 = 80;
   const center = `<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="10" fill="#8E8E93" letter-spacing="1">年度總計</text>
-    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="17" font-weight="500" fill="#2B2B2B" font-family="Playfair Display,Noto Serif TC,serif">${Math.round(total).toLocaleString()}</text>`;
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="17" font-weight="500" fill="#2B2B2B" font-family="Cormorant Garamond,Noto Serif TC,serif">${Math.round(total).toLocaleString()}</text>`;
   if(parts.length === 1){
     const p = parts[0];
     return `<svg class="chart" viewBox="0 0 ${S} ${S}" role="img" aria-label="年度開銷圓餅圖"><circle cx="${cx}" cy="${cy}" r="${(r0+r1)/2}" fill="none" stroke="${p.c}" stroke-width="${r1-r0}" data-tip="${p.k}\n${money(p.v)} · 100%"/>${center}</svg>`;
@@ -1470,6 +1513,8 @@ function renderSettings(){
         <li><b>週期為預設值：</b>驅蟲、疫苗、健檢等天數是可自行修改的預設值，實際頻率請依獸醫建議為準。</li>
         <li><b>毛孩隨身卡：</b>是飼主自行整理的個人紀錄卡，非官方登記、晶片登記或疫苗證明文件。</li>
         <li><b>備份檔含個資：</b>匯出的 JSON 含飼主姓名、電話與晶片號碼，請妥善保管，不要隨意分享。</li>
+        <li><b>數位商品不退換：</b>本工具為數位內容商品，一經購買並提供使用連結即視為交付完成，恕不接受退款或退換。</li>
+        <li><b>僅供購買者個人使用：</b>授權僅限購買者本人使用，禁止轉售、出租、分享或公開散布使用連結與程式內容。</li>
       </ol>
     </div>
     <p class="disclaim" style="text-align:center;margin-top:22px">毛孩日誌 · v3.0</p>
@@ -1958,7 +2003,7 @@ function loadImg(src){ return new Promise(res => { if(!src) return res(null); co
 async function passportPNG(p){
   const W = 1080, H = 1720, c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d');
-  const serif = '"Playfair Display","Noto Serif TC","Songti TC",serif', sans = '"Noto Sans TC","PingFang TC",sans-serif';
+  const serif = '"Cormorant Garamond","Noto Serif TC","Songti TC",serif', sans = '"Noto Serif TC","Songti TC",serif';
   const rr = (x,y,w,h,r) => { g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); };
   g.fillStyle = '#F8F7F4'; g.fillRect(0,0,W,H);
   g.fillStyle = '#fff'; rr(50,50,W-100,H-100,44); g.fill();
