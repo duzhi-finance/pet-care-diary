@@ -153,7 +153,7 @@ h1,h2,h3,.serif{font-family:var(--serif);font-weight:500;letter-spacing:.05em}
 .st.med{color:var(--blue-ink)}
 .st.done{color:var(--muted)}
 .no{position:absolute;top:14px;right:18px;font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--muted-2);letter-spacing:.06em}
-.tool-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:12px 0 0}
+.tool-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 0}
 .tool-btn{display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border-radius:var(--r);border:1px solid var(--line);background:#fff;font-size:13px;letter-spacing:.06em;color:var(--ink)}
 .tool-btn .ic{color:var(--gold)}
 .advice{display:flex;gap:12px;padding:14px 16px;border-radius:12px;background:var(--soft);border:1px solid var(--line);margin-top:12px}
@@ -1020,6 +1020,7 @@ function renderHome(){
   <div class="tool-row">
     <button class="tool-btn" data-act="er">急診專區</button>
     <button class="tool-btn" data-act="med-card" data-id="${p.id}">緊急就醫卡</button>
+    <button class="tool-btn" data-act="handover" data-id="${p.id}">交接備忘</button>
   </div>
 
   ${alerts.length ? `<section class="sec" style="margin-bottom:0">${alerts.map(al=>`
@@ -1234,6 +1235,17 @@ function renderCalendar(){
           <div class="body"><div class="ttl">${esc(petById(r.petId)?.name||'')}・${esc(r.category)}</div><div class="small muted"><span class="st done">已完成</span>${r.shop?` @ ${esc(r.shop)}`:''}${num(r.cost)!=null?` · ${money(r.cost)}`:''}</div></div>
           <button class="linkbtn" data-act="edit-record" data-id="${r.id}">查看</button>
         </div>`).join('')}
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h2>分享行程<span class="en">Share</span></h2><span class="aside">未來 30 天</span></div>
+    <div class="card pad">
+      <p class="disclaim" style="margin:0 0 12px">把接下來 30 天的照護、複診與補貨行程整理成純文字，傳給家人或另一位飼主。</p>
+      <div class="grid2">
+        <button class="btn" data-act="copy-schedule">複製行程文字</button>
+        <a class="btn" href="${esc(lineShareURL(scheduleText()))}" target="_blank" rel="noopener">傳到 LINE</a>
+      </div>
     </div>
   </section>
 
@@ -1886,6 +1898,55 @@ function bookingSheet(petId, cat){
 }
 
 /* ============================================================
+   分享：行程純文字、交接備忘（複製 / 傳到 LINE）
+   ============================================================ */
+const lineShareURL = text => 'https://line.me/R/share?text=' + encodeURIComponent(text);
+function scheduleText(days=30){
+  const t = today(), end = addDays(t, days), items = [];
+  for(const i of dueItems()) if(i.due && i.due <= end) items.push({d:i.due < t ? t : i.due, txt:`${i.pet.name}・${i.cat}${i.days < 0 ? `（已逾期 ${-i.days} 天）` : ''}${i.last?.shop ? ` @ ${i.last.shop}` : ''}`});
+  for(const f of followUps()) if(f.due <= end) items.push({d:f.due < t ? t : f.due, txt:`${f.pet.name}・複診${f.days < 0 ? `（已逾期 ${-f.days} 天）` : ''}${f.rec.shop ? ` @ ${f.rec.shop}` : ''}`});
+  for(const x of suppliesOf()) if(x.end <= end) items.push({d:x.end < t ? t : x.end, txt:`補貨・${x.s.name}（預計用完）`});
+  items.sort((a,b) => a.d.localeCompare(b.d));
+  const lines = items.map(x => { const d = parseD(x.d); return `${d.getMonth()+1}/${d.getDate()}（${WD[d.getDay()]}）${x.txt}`; });
+  return [`【毛孩日誌｜未來 ${days} 天行程】`, ...(lines.length ? lines : ['目前沒有排定的行程']), '', '— 由毛孩日誌整理'].join('\n');
+}
+function handoverText(p){
+  const recs = recsOf(p.id), o = state.settings.owner, vet = shopById(p.vetId), meds = activeMeds(p);
+  const lastBath = recs.find(r => ['洗澡','大美容','小美容'].includes(r.category));
+  const lastSkin = recs.find(r => r.skin && r.skin.length);
+  const w = latestWeight(p);
+  const sup = state.supplies.filter(s => s.petId === p.id || !s.petId).map(s => s.name + (s.note ? `（${s.note}）` : ''));
+  return [
+    `【毛孩交接備忘｜${p.name}】`,
+    `基本：${[p.species, p.breed, p.gender, ageText(p.birthday) !== '—' ? ageText(p.birthday) : '', w != null ? w + ' kg' : ''].filter(Boolean).join('・')}`,
+    p.chip && `晶片：${p.chip}`,
+    p.tags && p.tags.length && `個性：${p.tags.map(t => '#' + t).join(' ')}`,
+    p.notes && `特別注意（地雷）：${p.notes}`,
+    `過敏：${p.allergies || '無'}${p.drugAllergies ? `；藥物過敏：${p.drugAllergies}` : ''}`,
+    p.chronic && `慢性病：${p.chronic}`,
+    meds.length && `目前用藥：${meds.map(r => r.meds.split('\n')[0] + (r.freq ? `（${r.freq}）` : '')).join('；')}`,
+    sup.length && `飲食／用品：${sup.join('、')}`,
+    lastBath && `上次洗澡／美容：${lastBath.date}${lastBath.shop ? ' @ ' + lastBath.shop : ''}${lastBath.products ? '，' + lastBath.products : ''}`,
+    lastSkin && `最近皮膚狀況：${lastSkin.skin.join('、')}（${lastSkin.date}）`,
+    (o.name || o.phone) && `飼主：${[o.name, o.phone].filter(Boolean).join(' ')}`,
+    vet && `常用獸醫：${vet.name}${vet.phone ? ' ' + vet.phone : ''}`,
+    p.erPhone && `24H 急診：${p.erPhone}`,
+    '',
+    '— 由毛孩日誌整理，內容為飼主自行記錄',
+  ].filter(x => typeof x === 'string').join('\n');
+}
+function handoverSheet(p){
+  openSheet('交接備忘', `
+    <p class="disclaim" style="margin:-8px 0 14px">送洗、寄養或請家人代為照顧時，把習性、地雷、過敏、用藥與聯絡方式一次交代清楚。內容可以直接修改後再傳送。</p>
+    ${state.pets.length > 1 ? `<div class="chips">${state.pets.map(x=>`<button class="chip ${x.id===p.id?'on':''}" data-act="handover" data-id="${x.id}">${esc(x.name)}</button>`).join('')}</div>` : ''}
+    <div class="field"><textarea class="inp" id="hoText" style="min-height:300px;font-size:14px;line-height:1.8">${esc(handoverText(p))}</textarea></div>
+    <div class="grid2">
+      <button class="btn" data-act="copy-handover">複製文字</button>
+      <button class="btn dark" data-act="line-handover">傳到 LINE</button>
+    </div>`, '', 'Handover Note');
+}
+
+/* ============================================================
    急診專區：24H 醫院一鍵撥號 / 導航
    ============================================================ */
 const mapsURL = h => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(h.address || h.name);
@@ -2101,6 +2162,10 @@ document.addEventListener('click', async e => {
     case 'passport': passportSheet(petById(id)); break;
     case 'med-card': passportSheet(petById(id) || petById(ui.petId) || state.pets[0], true); break;
     case 'er': erSheet(); break;
+    case 'handover': handoverSheet(petById(id) || petById(ui.petId) || state.pets[0]); break;
+    case 'copy-handover': copyText($('#hoText').value, '交接備忘'); break;
+    case 'line-handover': window.open(lineShareURL($('#hoText').value), '_blank', 'noopener'); break;
+    case 'copy-schedule': copyText(scheduleText(), '未來 30 天行程'); break;
     case 'add-er': erForm(); break;
     case 'edit-er': erForm(state.settings.erHospitals.find(h=>h.id===id)); break;
     case 'del-er':
