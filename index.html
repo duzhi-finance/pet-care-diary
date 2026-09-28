@@ -470,6 +470,32 @@ h1, h2, h3, h4, h5, h6, .title, .card-title, .modal-title, .pet-name, .section-h
 .kpi .v, .big, .todo .when .d, .rec-date .dd, .ring .num { letter-spacing:.01em }
 .kpi .v{font-size:23px} .rec-date .dd{font-size:32px} .todo .when .d{font-size:24px} .big{font-size:32px} .cost{font-size:17px}
 .kpi .v small, .big small { font-family:'Noto Serif TC',serif !important; font-weight:400 !important }
+
+/* 等高數字：全站不使用高低不齊的老式數字 */
+body, input, select, textarea, button, .chart text { font-variant-numeric:lining-nums !important; font-feature-settings:"lnum" 1 }
+
+/* 空狀態：純文字排版 + 細框文字按鈕 */
+.empty-st .kick{display:block;font-family:'Cormorant Garamond','Playfair Display',serif !important;font-style:italic;font-size:15px;letter-spacing:.06em;color:#8E8E93;margin-bottom:6px}
+.empty-st h3{margin-top:0}
+.btn-line{display:inline-flex;align-items:center;justify-content:center;padding:11px 28px;border:1px solid #2B2B2B;border-radius:10px;background:transparent;color:#2B2B2B;font-size:13.5px;font-weight:400;letter-spacing:.18em}
+.btn-line:active{background:#2B2B2B;color:#fff}
+
+/* 主要資訊：Noto Serif TC 400、深炭灰 */
+.today-row .t, .todo .ttl, .ov-item > span:first-child, .alert .small, .sup .left, .kv dd, .inp, .cyc .inp,
+.btn, .btn-save, .bk-btn, .tool-btn, .chip, .linkbtn, .tags .badge {
+  font-family:'Noto Serif TC','Songti TC',serif !important; font-weight:400 !important;
+}
+.today-row .t, .ov-item > span:first-child, .sup .left, .kv dd, .inp, .cyc .inp { color:#2B2B2B }
+.sup.low .left { color:var(--warn-ink) }
+.alert .small { color:#4A4A4A !important }
+/* 純說明性的小字：較細字重 + 暖灰 */
+.today-row .t .muted, .todo .body .small.muted, .ov-top .small.muted, .ov-item .when, .sup .small.muted,
+.list-item .small.muted, .note, .disclaim, .hint {
+  font-family:'Noto Serif TC','Songti TC',serif !important; font-weight:300 !important; color:#8E8E93 !important;
+}
+.note b { font-weight:400 !important; color:#4A4A4A !important }
+.linkbtn { color:#8E8E93 }
+.linkbtn:hover { color:#2B2B2B }
 </style>
 </head>
 <body>
@@ -520,25 +546,11 @@ const CATS = [
 const MED_CATS = ['門診','健檢','用藥'];
 /* 1.5px 極細線條圖示（Lucide 風格），單色 */
 const ICONS = {
-  id:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2M15 12h2M7 16h6"/>',
   bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
-  alert:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>',
-  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
   pencil:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
   copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-  cake:'<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20M7 8v3M12 8v3M17 8v3M7 4h.01M12 4h.01M17 4h.01"/>',
-  siren:'<path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1M18.5 4.5 18 5M2 12h1M12 2v1M4.93 4.93l.71.71"/>',
   phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
   nav:'<path d="M3 11l19-9-9 19-2-8-8-2z"/>',
-  calc:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
-  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
-  pill:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
-  cross:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>',
-  sparkle:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/><path d="M19 3v4M17 5h4"/>',
-  book:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
-  chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
-  box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
 };
 const icon = (n, cls='') => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 const CAT = Object.fromEntries(CATS.map(c=>[c.k,c]));
@@ -864,7 +876,7 @@ function seniorTip(p){
     : ls.k === 'near'
     ? `<b>${esc(p.name)} 即將邁入熟齡（7 歲）</b><br>可以開始安排第一次熟齡健檢，建立血檢基準值，之後比較更準確。`
     : `<b>${esc(p.name)} 還在幼齡期</b><br>疫苗需依獸醫排程補強（通常 3–4 劑），建議每 1–2 週量一次體重，確認成長曲線。`;
-  return `<div class="advice" style="margin:12px 20px 0">${icon('info','lg')}<div class="small" style="color:var(--ink-2)">${txt}<div class="disclaim" style="margin-top:4px">一般照護參考，非醫療建議，請以獸醫評估為準。</div></div></div>`;
+  return `<div class="advice" style="margin:12px 20px 0"><div class="small" style="color:var(--ink-2)">${txt}<div class="disclaim" style="margin-top:4px">一般照護參考，非醫療建議，請以獸醫評估為準。</div></div></div>`;
 }
 function identityCard(p){
   const w = latestWeight(p), a = ageShort(p.birthday), recs = recsOf(p.id);
@@ -874,7 +886,7 @@ function identityCard(p){
   const v = vaccines(p), bd = nextBirthday(p.birthday), sx = sexIcon(p.gender), hd = homeDays(p), meds = activeMeds(p);
   return `<section class="card idc">
     <div class="idc-band"><span class="k">PET IDENTITY CARD</span>
-      <button class="pass-btn" data-act="passport" data-id="${p.id}">${icon('id')} 出示隨身卡</button></div>
+      <button class="pass-btn" data-act="passport" data-id="${p.id}">出示隨身卡</button></div>
     <div class="idc-top">
       <button class="av-ring" data-act="pet-photo" data-id="${p.id}" aria-label="更換大頭貼">
         ${avatarHTML(p)}${sx?`<span class="sex" title="${esc(p.gender)}">${sx}</span>`:''}<span class="cam">${icon('pencil')}</span>
@@ -890,9 +902,9 @@ function identityCard(p){
       <div class="idc-row"><span class="l">晶片號碼</span><span class="v">${p.chip?`<button class="chip-no" data-act="copy-chip" data-id="${p.id}">${esc(p.chip)}<span class="copy-ic" aria-label="複製晶片號碼">${icon('copy')}</span></button>`:'<span class="muted">未填寫</span>'}</span>
         ${p.chip?'':`<button class="linkbtn" data-act="edit-pet" data-id="${p.id}">填寫</button>`}</div>
       <div class="idc-row"><span class="l">狂犬病疫苗</span><span class="v"><span class="badge ${v.rabiesS.cls}">${v.rabiesS.txt}</span></span></div>
-      ${bd ? `<div class="idc-row"><span class="l">生日倒數</span><span class="v">${bd.days===0?`${icon('cake','gold')} 今天 ${bd.age} 歲生日！`:`${md(bd.date)} · 還有 ${bd.days} 天滿 ${bd.age} 歲`}</span></div>` : ''}
-      ${hd ? `<div class="idc-row"><span class="l">到家紀念</span><span class="v">${icon('heart','gold')} 來到我們家已經 <b class="serif">${hd.days.toLocaleString()}</b> 天囉${hd.next===0?`，今天是 ${hd.years} 週年！`:`<span class="muted small">　${hd.next} 天後滿 ${hd.years} 週年</span>`}</span></div>` : ''}
-      ${meds.length ? `<div class="idc-row"><span class="l">目前用藥</span><span class="v">${meds.map(r=>`<div>${icon('pill','gray')} ${esc(r.meds.split('\n')[0])}${r.freq?`<span class="muted small"> · ${esc(r.freq)}</span>`:''}${medEnd(r)?`<span class="muted small"> · 至 ${md(medEnd(r))}</span>`:''}</div>`).join('')}</span></div>` : ''}
+      ${bd ? `<div class="idc-row"><span class="l">生日倒數</span><span class="v">${bd.days===0?`今天 ${bd.age} 歲生日！`:`${md(bd.date)} · 還有 ${bd.days} 天滿 ${bd.age} 歲`}</span></div>` : ''}
+      ${hd ? `<div class="idc-row"><span class="l">到家紀念</span><span class="v">來到我們家已經 <b class="serif">${hd.days.toLocaleString()}</b> 天囉${hd.next===0?`，今天是 ${hd.years} 週年！`:`<span class="muted small">　${hd.next} 天後滿 ${hd.years} 週年</span>`}</span></div>` : ''}
+      ${meds.length ? `<div class="idc-row"><span class="l">目前用藥</span><span class="v">${meds.map(r=>`<div>${esc(r.meds.split('\n')[0])}${r.freq?`<span class="muted small"> · ${esc(r.freq)}</span>`:''}${medEnd(r)?`<span class="muted small"> · 至 ${md(medEnd(r))}</span>`:''}</div>`).join('')}</span></div>` : ''}
     </div>
     ${seniorTip(p)}
     <div class="kpis">
@@ -961,10 +973,10 @@ function renderHome(){
   if(!state.pets.length){
     return masthead('毛孩日誌','Pet Care Diary') + `
     <div class="card empty-st">
-      ${icon('sparkle')}
+      <span class="kick">Pet Care Diary</span>
       <h3>開啟您與毛孩的純粹日誌</h3>
       <p>先建立毛孩檔案，之後每一次美容、洗澡、看診與用藥，都能在這裡安靜地留下紀錄。</p>
-      <button class="btn dark" data-act="add-pet">${icon('plus')} 建立毛孩檔案</button>
+      <button class="btn-line" data-act="add-pet">建立毛孩檔案 →</button>
     </div>
     <p class="disclaim" style="text-align:center;margin-top:18px">資料只儲存在這台裝置的這個瀏覽器，不會上傳到任何伺服器。</p>`;
   }
@@ -1003,8 +1015,8 @@ function renderHome(){
   </div>` : ''}
   ${all ? overviewCards() : identityCard(p)}
   <div class="tool-row">
-    <button class="tool-btn" data-act="er">${icon('siren','lg')} 急診專區</button>
-    <button class="tool-btn" data-act="med-card" data-id="${p.id}">${icon('cross','lg')} 緊急就醫卡</button>
+    <button class="tool-btn" data-act="er">急診專區</button>
+    <button class="tool-btn" data-act="med-card" data-id="${p.id}">緊急就醫卡</button>
   </div>
 
   ${alerts.length ? `<section class="sec" style="margin-bottom:0">${alerts.map(al=>`
@@ -1060,7 +1072,7 @@ function renderHome(){
 
   <section class="sec">
     <div class="sec-h"><h2>飼料與消耗品<span class="en">Supplies</span></h2><button class="linkbtn" data-act="add-supply">＋ 新增</button></div>
-    <div class="card">${sups.length ? sups.map(supplyRow).join('') : `<div class="empty"><span class="serif">尚未新增消耗品</span>記錄飼料、貓砂或常用藥品的開始日期與可用天數，剩 7 天時提醒你補貨。<br><button class="btn sm" style="margin-top:14px" data-act="add-supply">${icon('plus')} 新增消耗品</button></div>`}</div>
+    <div class="card">${sups.length ? sups.map(supplyRow).join('') : `<div class="empty"><span class="serif">尚未新增消耗品</span>記錄飼料、貓砂或常用藥品的開始日期與可用天數，剩 7 天時提醒你補貨。<br><button class="btn sm" style="margin-top:14px" data-act="add-supply">＋ 新增消耗品</button></div>`}</div>
   </section>
 
   <section class="sec">
@@ -1070,7 +1082,7 @@ function renderHome(){
     </div>
   </section>
 
-  <div class="note">${icon('info')}<div>
+  <div class="note"><div>
     <b>本工具沒有主動通知功能</b>，不會推播提醒，請記得定期打開查看今日提醒。<br>
     資料只儲存在<b>這台裝置的這個瀏覽器</b>，換裝置或清除瀏覽器資料就會遺失。
     ${bAge == null ? '<b>你還沒有備份過</b>，' : bAge > 30 ? `上次備份是 <b>${bAge} 天前</b>，` : `上次備份：${dotDate(state.settings.lastBackup)}。`}
@@ -1153,7 +1165,7 @@ function renderTimeline(){
   return masthead('照護時間軸','Care Journal') + `
     ${state.pets.length > 1 ? petChips(ui.tlPet,'tl-pet',true) : ''}
     <div class="chips">${['全部','病歷',...CATS.map(c=>c.k)].map(k=>`<button class="chip ${ui.tlCat===k?'on':''}" data-act="tl-cat" data-v="${k}">${k}</button>`).join('')}</div>
-    ${recs.length ? html : `<div class="card empty-st" style="margin-top:16px">${icon('book')}<h3>尚無照護紀錄</h3><p>${state.records.length ? '這個篩選條件下沒有紀錄。' : '每一次美容、洗澡、驅蟲與看診，都會依時間排列在這裡。'}</p>${state.pets.length ? `<button class="btn dark" data-act="add-record">${icon('plus')} 新增第一筆紀錄</button>` : `<button class="btn dark" data-act="add-pet">${icon('plus')} 建立毛孩檔案</button>`}</div>`}`;
+    ${recs.length ? html : `<div class="card empty-st" style="margin-top:16px"><span class="kick">Care Journal</span><h3>尚無照護紀錄</h3><p>${state.records.length ? '這個篩選條件下沒有紀錄。' : '每一次美容、洗澡、驅蟲與看診，都會依時間排列在這裡。'}</p>${state.pets.length ? `<button class="btn-line" data-act="add-record">新增第一筆紀錄 →</button>` : `<button class="btn-line" data-act="add-pet">建立毛孩檔案 →</button>`}</div>`}`;
 }
 
 /* ============================================================
@@ -1324,7 +1336,7 @@ function feedHTML(p){
   if(!st) return `<section class="sec"><div class="sec-h"><h2>每日餵食計算<span class="en">Feeding</span></h2></div><div class="card empty">目前僅支援狗與貓的熱量估算。</div></section>`;
   const def = p.feedStage && st.some(x=>x[0]===p.feedStage) ? p.feedStage : defaultStage(p);
   return `<section class="sec" id="feed" data-pet="${p.id}">
-    <div class="sec-h"><h2>每日餵食計算<span class="en">Feeding</span></h2><span class="aside">${icon('calc','gray')}</span></div>
+    <div class="sec-h"><h2>每日餵食計算<span class="en">Feeding</span></h2><span class="aside"></span></div>
     <div class="card pad">
       <div class="grid2">
         <div class="field"><label for="fd-w">體重 (kg)</label><input class="inp" id="fd-w" type="number" step="0.01" min="0" inputmode="decimal" data-calc value="${latestWeight(p) ?? ''}"></div>
@@ -1360,7 +1372,7 @@ function calcFeed(persist){
   if(persist){ p.foodKcal = kcal; p.feedStage = stage; p.feedMeals = meals; save(); }
 }
 function renderStats(){
-  if(!state.pets.length) return masthead('數據統計','Insights') + `<div class="card empty-st">${icon('chart')}<h3>尚無數據</h3><p>建立毛孩檔案並累積 2 筆以上紀錄後，即可生成體重趨勢與開銷分析。</p><button class="btn dark" data-act="add-pet">${icon('plus')} 建立毛孩檔案</button></div>`;
+  if(!state.pets.length) return masthead('數據統計','Insights') + `<div class="card empty-st"><span class="kick">Insights</span><h3>尚無數據</h3><p>建立毛孩檔案並累積 2 筆以上紀錄後，即可生成體重趨勢與開銷分析。</p><button class="btn-line" data-act="add-pet">建立毛孩檔案 →</button></div>`;
   if(ui.statPet !== 'all' && !petById(ui.statPet)) ui.statPet = petById(ui.petId) ? ui.petId : state.pets[0].id;
   const p = ui.statPet === 'all' ? null : petById(ui.statPet);
   const recs = state.records.filter(r => !p || r.petId === p.id);
@@ -1375,7 +1387,7 @@ function renderStats(){
           <div class="idc-name" style="font-size:24px">${esc(p.name)}</div>
           <div class="idc-sub">${esc([p.breed, ageText(p.birthday)!=='—'?ageText(p.birthday):'', p.coat].filter(Boolean).join(' · ')||'—')}</div>
         </div>
-        <button class="pass-btn" data-act="passport" data-id="${p.id}">${icon('id')} 隨身卡</button>
+        <button class="pass-btn" data-act="passport" data-id="${p.id}">隨身卡</button>
       </div>
       <div class="kpis" style="padding:18px 0 0">
         <div class="kpi"><div class="v">${pr.length}</div><div class="l">照護紀錄</div></div>
@@ -1433,7 +1445,7 @@ function renderSettings(){
     <div class="card">${state.pets.length ? state.pets.map(p=>`
       <div class="list-item">${avatarHTML(p)}
         <div class="grow"><div class="serif">${esc(p.name)}</div><div class="small muted">${esc([p.breed, ageText(p.birthday)!=='—'?ageText(p.birthday):''].filter(Boolean).join(' · ')||'—')}</div></div>
-        <button class="linkbtn" data-act="passport" data-id="${p.id}">${icon('id')} 隨身卡</button>
+        <button class="linkbtn" data-act="passport" data-id="${p.id}">隨身卡</button>
         <button class="linkbtn" data-act="edit-pet" data-id="${p.id}">編輯</button>
       </div>`).join('') : `<div class="empty">尚未建立毛孩資料</div>`}</div>
   </section>
@@ -1493,7 +1505,7 @@ function renderSettings(){
         <button class="btn dark" data-act="export-json">匯出 JSON 備份</button>
         <button class="btn" data-act="import-json">匯入 JSON</button>
       </div>
-      <p class="disclaim" style="margin-top:12px">${icon('alert','gray')} 備份檔含飼主姓名、電話與晶片號碼等個人資料，請妥善保管，不要隨意分享給他人。</p>
+      <p class="disclaim" style="margin-top:12px">備份檔含飼主姓名、電話與晶片號碼等個人資料，請妥善保管，不要隨意分享給他人。</p>
       <p class="disclaim">資料只存在這台裝置的這個瀏覽器（localStorage，約 5MB；目前使用 ${(storageKB()/1024).toFixed(1)} MB），換裝置或清除瀏覽器資料就會消失，請定期匯出備份。</p>
       <hr class="hr">
       <div class="row between">
@@ -1889,8 +1901,8 @@ function erSheet(){
     ${list.length ? list.map(h => card(h, '24H')).join('') : `<div class="empty"><span class="serif">尚未設定急診醫院</span>建議預先整理 2–3 家鄰近的 24 小時動物醫院。</div>`}
     ${vets.map(v => card(v, '常用獸醫')).join('')}
     <div class="grid2" style="margin-top:16px">
-      <button class="btn" data-act="add-er">${icon('plus')} 新增急診醫院</button>
-      ${pet ? `<button class="btn" data-act="med-card" data-id="${pet.id}">${icon('cross')} ${esc(pet.name)} 就醫卡</button>` : ''}
+      <button class="btn" data-act="add-er">＋ 新增急診醫院</button>
+      ${pet ? `<button class="btn" data-act="med-card" data-id="${pet.id}">${esc(pet.name)} 就醫卡</button>` : ''}
     </div>`, '', 'Emergency');
 }
 function erForm(h0){
