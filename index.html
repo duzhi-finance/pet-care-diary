@@ -25,22 +25,22 @@
   --kpi:#F7F6F4;
   --soft:#FAFAF8;
   --ink:#2B2B2B;
-  --ink-2:#3D3D3D;
-  --muted:#6B6B70;
-  --muted-2:#8A8A8F;
-  --label:rgba(43,43,43,.66);
-  --line:#E6E4E0;
-  --line-2:#E3E1DD;
+  --ink-2:#333333;
+  --muted:#535358;
+  --muted-2:#66666B;
+  --label:#55555A;
+  --line:#DEDBD6;
+  --line-2:#D6D3CE;
   --rose:#C89B95;
-  --rose-ink:#9E6F69;
+  --rose-ink:#86574F;
   --rose-bg:#F5ECE9;
   --blush:#E8D8D5;
   --blue-bg:#EEF2F5;
-  --blue-ink:#5E7084;
+  --blue-ink:#4E5F72;
   --gold:#D4AF37;
   --milk:#C8B8A6;
   --warn-bg:#F6EEEC;
-  --warn-ink:#9E625A;
+  --warn-ink:#8A4E46;
   --radius:16px;
   --r:10px;
   --shadow:0 2px 10px rgba(0,0,0,.02);
@@ -337,7 +337,7 @@ select.inp{background:#FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .opt input:checked+span{background:var(--ink);color:#FFFFFF;border-color:var(--ink)}
 .opt.skin input:checked+span:before{content:"✓";font-size:calc(11.5px * var(--fs))}
 .opt input:focus-visible+span{box-shadow:0 0 0 2px rgba(212,175,55,.4)}
-.hint{font-size:calc(12.5px * var(--fs));color:var(--muted-2);margin-top:6px;line-height:1.7}
+.hint{font-size:calc(12.5px * var(--fs));color:var(--muted);margin-top:6px;line-height:1.7}
 .ph-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .ph-cell{display:flex;flex-direction:column;gap:5px}
 .ph{position:relative;aspect-ratio:1;border-radius:var(--r);overflow:hidden;background:var(--soft);border:1px solid var(--line)}
@@ -405,7 +405,7 @@ select.inp{background:#FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
 .nav .in{max-width:680px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));height:var(--nav-h)}
 .nav .brand{display:none}
-.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:calc(11.5px * var(--fs));color:var(--muted-2);letter-spacing:.08em}
+.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:calc(11.5px * var(--fs));color:var(--muted);letter-spacing:.08em}
 .nav button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .nav button.on{color:var(--ink)}
 .fab{position:fixed;z-index:41;right:max(18px,calc(50% - 340px + 18px));bottom:calc(var(--nav-h) + var(--safe-b) + 18px);width:50px;height:50px;border-radius:50%;background:var(--ink);color:#fff;font-size:calc(24px * var(--fs));font-weight:300;box-shadow:0 4px 14px rgba(0,0,0,.10);display:flex;align-items:center;justify-content:center}
@@ -1275,25 +1275,25 @@ function weightChart(pts, target){
   const t0 = parseD(pts[0].x).getTime(), t1 = parseD(pts[pts.length-1].x).getTime();
   const X = x => pts.length === 1 ? (L + (W-L-R)/2) : L + (parseD(x).getTime()-t0)/(t1-t0) * (W-L-R);
   const Y = y => T + (1 - (y-lo)/(hi-lo)) * (H-T-B);
-  const grid = ticks.map(v=>`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#F0EFEC" stroke-width="1"/><text x="${L-6}" y="${Y(v)+3.5}" text-anchor="end" font-size="11.5" fill="#6B6B70">${v}</text>`).join('');
+  const grid = ticks.map(v=>`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#F0EFEC" stroke-width="1"/><text x="${L-6}" y="${Y(v)+3.5}" text-anchor="end" font-size="11.5" fill="#535358">${v}</text>`).join('');
   const line = pts.map((p,i)=>`${i?'L':'M'}${X(p.x).toFixed(1)},${Y(p.y).toFixed(1)}`).join('');
   const area = line + `L${X(pts[pts.length-1].x).toFixed(1)},${H-B}L${X(pts[0].x).toFixed(1)},${H-B}Z`;
   const last = pts[pts.length-1];
   const xl = (() => {
-    if(pts.length === 1) return `<text x="${X(pts[0].x)}" y="${H-8}" text-anchor="middle" font-size="11.5" fill="#6B6B70">${dotDate(pts[0].x)}</text>`;
+    if(pts.length === 1) return `<text x="${X(pts[0].x)}" y="${H-8}" text-anchor="middle" font-size="11.5" fill="#535358">${dotDate(pts[0].x)}</text>`;
     const n = Math.min(pts.length, 4), idx = [...new Set(Array.from({length:n}, (_,k)=>Math.round(k*(pts.length-1)/(n-1))))];
     let lastX = -1e9; const out = [];
     idx.forEach((ix,k) => {
       const x = X(pts[ix].x), end = k === idx.length-1;
       if(!end && x - lastX < 70) return;
       if(end && out.length && x - lastX < 70) out.pop();
-      out.push(`<text x="${x}" y="${H-8}" text-anchor="${k===0?'start':end?'end':'middle'}" font-size="11.5" fill="#6B6B70">${dotDate(pts[ix].x)}</text>`);
+      out.push(`<text x="${x}" y="${H-8}" text-anchor="${k===0?'start':end?'end':'middle'}" font-size="11.5" fill="#535358">${dotDate(pts[ix].x)}</text>`);
       lastX = x;
     });
     return out.join('');
   })();
   const tgt = target != null ? `<line x1="${L}" x2="${W-R}" y1="${Y(target)}" y2="${Y(target)}" stroke="#B5B5B5" stroke-width="1.2" stroke-dasharray="4 4"/>
-    <text x="${L+4}" y="${Y(target)-5}" font-size="11.5" fill="#6B6B70">理想 ${target} kg</text>` : '';
+    <text x="${L+4}" y="${Y(target)-5}" font-size="11.5" fill="#535358">理想 ${target} kg</text>` : '';
   return `<svg class="chart wt" viewBox="0 0 ${W} ${H}" role="img" aria-label="體重趨勢圖">
     <defs><linearGradient id="wg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2B2B2B" stop-opacity=".06"/><stop offset="1" stop-color="#2B2B2B" stop-opacity="0"/></linearGradient></defs>
     ${grid}${tgt}
@@ -1306,7 +1306,7 @@ function weightChart(pts, target){
 }
 function donut(parts, total){
   const S = 170, cx = 85, cy = 85, r0 = 56, r1 = 80;
-  const center = `<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="11.5" fill="#6B6B70" letter-spacing="1">年度總計</text>
+  const center = `<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="11.5" fill="#535358" letter-spacing="1">年度總計</text>
     <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="17" font-weight="500" fill="#2B2B2B" font-family="Cormorant Garamond,Noto Serif TC,serif">${Math.round(total).toLocaleString()}</text>`;
   if(parts.length === 1){
     const p = parts[0];
@@ -1331,7 +1331,7 @@ function monthBars(vals){
     const x = L + i*bw + (bw-w)/2, h = v ? Math.max(3, v/max*(H-T-B)) : 0, y = H-B-h, rr = Math.min(4, h, w/2);
     if(h) out += `<path d="M${x},${H-B}V${y+rr}Q${x},${y} ${x+rr},${y}H${x+w-rr}Q${x+w},${y} ${x+w},${y+rr}V${H-B}Z" fill="${i===mi?'#2B2B2B':'#DDD3C6'}"/>`;
     out += `<rect x="${L+i*bw}" y="${T-10}" width="${bw}" height="${H-T-B+10}" fill="transparent" data-tip="${i+1} 月\n${money(v)}"/>`;
-    out += `<text x="${L+i*bw+bw/2}" y="${H-7}" text-anchor="middle" font-size="11.5" fill="#6B6B70">${i+1}</text>`;
+    out += `<text x="${L+i*bw+bw/2}" y="${H-7}" text-anchor="middle" font-size="11.5" fill="#535358">${i+1}</text>`;
   });
   if(vals[mi] > 0){
     const x = L + mi*bw + bw/2, y = H-B - vals[mi]/max*(H-T-B) - 5;
